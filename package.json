@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.0.7",
+    "@dnd-kit/sortable": "^7.0.2",
     "@next/font": "13.1.6",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
@@ -18,6 +20,15 @@
     "next": "13.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "typescript": "4.9.4"
+    "sortablejs": "^1.15.0",
+    "typescript": "4.9.4",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/sortablejs": "^1.15.0",
+    "@types/uuid": "^9.0.0",
+    "autoprefixer": "^10.4.13",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.4"
   }
 }
