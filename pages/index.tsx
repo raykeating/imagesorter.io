@@ -1,98 +1,79 @@
-import Head from "next/head";
-import Image from "next/image";
-import React, { FC, useState } from "react";
-import PhotoCard from "../components/PhotoCard";
+import React, { useState, useEffect } from "react";
 import { Photo } from "../types";
 import FileInput from "@/components/FileInput";
 import { v4 as uuid } from "uuid";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-
-import { SortableItem } from "@/components/SortableItem";
+import GridSortingInterface from "@/components/GridSortingInterface";
+import FullSizeImageOverlay from "@/components/FullSizeImageOverlay";
 
 export default function Home() {
   const [photos, setPhotos] = useState<Photo[]>([]);
-  const [selectedPhotoID, setSelectedPhotoID] = useState<string | null>(null);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const [fullSizeImage, setFullSizeImage] = useState<Photo | null>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
       const photos: Photo[] = [];
       for (let i = 0; i < files.length; i++) {
-        photos.push({
-          type: undefined,
-          name: files[i].name,
-          file: files[i],
-          id: uuid(),
-        });
+        photos.push(
+          new Photo({
+            type: undefined,
+            name: files[i].name,
+            file: files[i],
+            id: uuid(),
+          })
+        );
       }
       setPhotos(photos);
     }
   };
 
+  // this useEffect sends the photos in the state to localhost:5000/api/photos and then sets the type of the photo to the response from the server
+  useEffect(() => {
+    const uploadPhotos = async () => {
+      const formData = new FormData();
+      photos.forEach((photo) => {
+        formData.append("image", photo.file as Blob);
+      });
+      const response = await fetch("http://localhost:5000/predict", {
+        method: "POST",
+        body: formData,
+      });
+      const json = await response.json();
+      const predictions = json.predictions;
+      const photosWithTypes: Photo[] = [];
+      photos.forEach((photo, index) => {
+        photosWithTypes.push(
+          new Photo({
+            ...photo,
+            type: predictions[index].prediction,
+          })
+        );
+      });
+      setPhotos(photosWithTypes);
+    };
+
+    if (photos.length > 0) {
+      uploadPhotos();
+    }
+  }, [photos.length]);
+
   return (
     <>
-      <div className="max-w-[800px] mx-auto pt-8">
-        <h1 className="text-3xl font-bold mb-8">PhotoSorter</h1>
+      <div className="mx-auto max-w-[800px] w-full pt-8 mb-2 flex flex-col items-end">
         <FileInput handleFileUpload={handleFileUpload} />
-        {/* grid of cards */}
-        <ul className="grid grid-cols-3 gap-4 my-4">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-            onDragStart={handleDragStart}
-          >
-            <SortableContext items={photos.map(p => p.id)}>
-              {photos.map((photo) => (
-                <SortableItem key={photo.id} id={photo.id}>
-                  <PhotoCard
-                    photo={photo}
-                    isSelected={photo.id === selectedPhotoID}
-                  />
-                </SortableItem>
-              ))}
-            </SortableContext>
-          </DndContext>
-        </ul>
       </div>
+      <GridSortingInterface
+        items={photos}
+        setItems={setPhotos}
+        setFullSizeImage={(photo: Photo) => setFullSizeImage(photo)}
+      />
+
+      <FullSizeImageOverlay
+        photo={fullSizeImage}
+        setFullSizeImage={setFullSizeImage}
+      />
     </>
   );
 
-  function handleDragEnd(event: any) {
-    const { active, over } = event;
-
-    if (active.id !== over.id) {
-      setPhotos((items) => {
-        const oldIndex = items.findIndex(p => p.id === active.id);
-        const newIndex = items.findIndex(p => p.id === over.id);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-    setSelectedPhotoID(null);
-  }
-  function handleDragStart(event: any) {
-    const { active } = event;
-    setSelectedPhotoID(active.id);
-  }
+  
 }
