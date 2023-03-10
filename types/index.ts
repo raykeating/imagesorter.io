@@ -10,6 +10,7 @@ interface Photo {
     | undefined;
   name: string;
   file: Blob | File | undefined;
+  fileUrl: string;
   id: string;
 }
 
@@ -18,16 +19,19 @@ class Photo implements Photo {
     type,
     name,
     file,
+    fileUrl,
     id,
   }: {
     type: Photo["type"];
     name: Photo["name"];
     file: Photo["file"];
+    fileUrl: Photo["fileUrl"];
     id: Photo["id"];
   }) {
     this.type = type;
     this.name = name;
     this.file = file;
+    this.fileUrl = fileUrl;
     this.id = id;
   }
 

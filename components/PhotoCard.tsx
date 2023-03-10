@@ -28,20 +28,19 @@ export default function PhotoCard({
   return (
     <div
       style={{ touchAction: "none" }}
-      className={`relative select-none flex items-center justify-center text-3xl text-gray-900 font-bold w-full aspect-square
-                    `}
+      className={`relative select-none flex items-center justify-center text-3xl text-gray-900 font-bold w-full aspect-square shadow `}
       onClick={(e) => handleItemClick(e, photo)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
+      {photo.type && photo.type !== "other" && <div
         className={`absolute top-0 left-0 bg-opacity-50 z-50 text-white text-xs p-1 `}
         style={{ ...Photo.getColorFromType(photo.type) }}
       >
         {Photo.getTypeAsString(photo.type)}
-      </div>
+      </div>}
       <Image
-        src={URL.createObjectURL(photo.file as Blob)}
+        src={photo.fileUrl}
         alt={photo.name}
         style={{ objectFit: "cover" }}
         className=""

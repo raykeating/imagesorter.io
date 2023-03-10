@@ -57,7 +57,7 @@ export default function GridSortingInterface({
   });
 
   return (
-    <div className="w-screen h-screen" onClick={() => setSelectedItems([])}>
+    <div className="w-screen min-h-screen mb-4" onClick={() => setSelectedItems([])}>
       <div className="max-w-[800px] mx-auto overflow-visible">
         <div className="flex gap-4 mb-2 w-full justify-end">
           <button className="bg-blue-400 px-4 py-2" onClick={handleRearrange}>Rearrange</button>

@@ -25,7 +25,7 @@ export default function FullSizeImageOverlay({
           <div className="w-[70vw] h-[100vh] flex items-center ">
             <div className="w-full h-[60vh] relative bg-[#040404] border-2 border-white">
               <Image
-                src={URL.createObjectURL(photo.file)}
+                src={photo.fileUrl}
                 alt={photo.name}
                 style={{ objectFit: "contain" }}
                 fill
