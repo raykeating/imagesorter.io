@@ -1,5 +1,5 @@
 import React from "react";
-import { Photo } from "../types";
+import { Photo } from "../types/Photo";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,7 +15,7 @@ export default function FullSizeImageOverlay({
       {photo && (
         <motion.div
           key={photo.id}
-          className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 z-50 flex items-center justify-center"
+          className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 z-30 flex items-center justify-center"
           onClick={() => setFullSizeImage(null)}
           transition={{ duration: 0.1 }}
           initial={{ opacity: 0 }}

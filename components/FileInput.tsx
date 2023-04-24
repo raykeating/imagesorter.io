@@ -1,23 +1,24 @@
-import React from "react";
+import { useRef } from 'react';
 
-export default function FileInput({ handleFileUpload }: any) {
+function FileInput({ handleFileUpload }: any) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <form id="photo-upload" className="flex flex-col gap-2 w-full">
-      <div>
-        <label
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          htmlFor="file_input"
-        >
-          Upload files
-        </label>
-        <input
-          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-          id="file_input"
-          type="file"
-          multiple
-          onChange={handleFileUpload}
-        />
-      </div>
-    </form>
+    <div className="inline-block text-blue-500 hover:text-blue-800 cursor-pointer">
+      <span onClick={handleButtonClick} className="text-zinc-400 hover:text-zinc-300 transition-colors cursor-pointer">Upload <i className='fa-solid fa-upload'></i></span>
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFileUpload}
+        multiple
+      />
+    </div>
   );
 }
+
+export default FileInput;

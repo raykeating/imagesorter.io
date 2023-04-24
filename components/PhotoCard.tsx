@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import { Photo } from "../types";
+import Photo from "../types/Photo";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PhotoCard({
@@ -28,20 +28,20 @@ export default function PhotoCard({
   return (
     <div
       style={{ touchAction: "none" }}
-      className={`relative select-none flex items-center justify-center text-3xl text-gray-900 font-bold w-full aspect-square shadow `}
+      className={`relative select-none flex items-center justify-center text-3xl text-gray-900 font-bold aspect-square shadow w-full`}
       onClick={(e) => handleItemClick(e, photo)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {photo.type && photo.type !== "other" && <div
-        className={`absolute top-0 left-0 bg-opacity-50 z-50 text-white text-xs p-1 `}
-        style={{ ...Photo.getColorFromType(photo.type) }}
+      {photo.tag && <div
+        className={`absolute top-0 left-0 bg-opacity-50 z-20 text-white text-xs p-1`}
+        style={{ backgroundColor: photo.tag.color }}
       >
-        {Photo.getTypeAsString(photo.type)}
+        {photo.tag.text} - {photo.tag?.confidence && Math.round(photo.tag.confidence * 100)}%
       </div>}
       <Image
         src={photo.fileUrl}
-        alt={photo.name}
+        alt={photo.filename}
         style={{ objectFit: "cover" }}
         className=""
         fill
@@ -49,7 +49,7 @@ export default function PhotoCard({
       <AnimatePresence>
         {isHovered && (
           <motion.div
-            transition={{ duration: 0.1 }}
+            transition={{ duration: 0.15 }}
             animate={{ opacity: 1 }}
             initial={{ opacity: 0 }}
             exit={{ opacity: 0 }}
