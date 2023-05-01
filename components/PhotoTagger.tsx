@@ -100,7 +100,8 @@ export default function PhotoTagger({
 							/>
 						</motion.div>
 					)}
-
+				</AnimatePresence>
+				<AnimatePresence>
 					{isHovered && (
 						<motion.div
 							initial={{ opacity: 0 }}

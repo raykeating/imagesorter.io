@@ -65,7 +65,7 @@ export default function TagsDrawer() {
 		<div className="flex flex-col gap-2 items-end w-full relative">
 			<div className="flex gap-2">
 				<button className="relative px-3 py-2 border-zinc-300 rounded border">Sort Images by Tag <i className="fa-solid fa-sort text-zinc-300 text-sm ml-1"></i>
-				<span className="absolute top-[-10px] left-[-10px] text-xs font-bold bg-purple-100 p-1 rounded text-purple-900">PRO</span>
+				{/* <span className="absolute top-[-10px] left-[-10px] text-xs font-bold bg-purple-100 p-1 rounded text-purple-900">PRO</span> */}
 				</button>
 				<form onSubmit={handleAddTag} className="relative flex items-center">
 					<input
