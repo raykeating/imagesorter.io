@@ -63,7 +63,7 @@ export default function PhotoCard({
 				<AnimatePresence>
 					{isHovered && (
 						<motion.div
-							transition={{ duration: 0.15 }}
+							transition={{ duration: 0.1 }}
 							animate={{ opacity: 1 }}
 							initial={{ opacity: 0 }}
 							exit={{ opacity: 0 }}

@@ -100,40 +100,51 @@ export default function PhotoTagger({
 							/>
 						</motion.div>
 					)}
-				</AnimatePresence>
-				{isHovered && (
-					<Popover
-						isOpen={showingTooltip}
-						positions={["right", "left", "top", "bottom"]}
-						content={
-							<div className="flex items-center ml-1">
-								<div className="bg-black rotate-45 h-[10px] w-[10px] mr-[-5px]"></div>
-								<span className="px-2 py-1 bg-black text-white z-40 rounded text-sm">
-									Add tag
-								</span>
-							</div>
-						}
-					>
-						<button
-							onClick={
-								addingTag === photoId ? handleClearButtonClick : handleAddTag
-							}
-							className="bg-white/40 hover:bg-white/75  z-20 backdrop-blur h-7 w-7 rounded-sm shadow shadow-black/25 hover:shadow-black/50 transition-all flex items-center justify-center aspect-square relative"
-							onMouseEnter={startTooltipTimer}
-							onMouseLeave={clearTooltipTimer}
+
+					{isHovered && (
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.1 }}
+							key={photoId}
 						>
-							{addingTag === photoId ? (
-								searchValue ? (
-									<i className="fa-regular fa-circle-xmark text-[12px]"></i>
-								) : (
-									<i className="fa-solid fa-angle-right text-[12px]"></i>
-								)
-							) : (
-								<i className="fa-solid fa-tag w-3"></i>
-							)}
-						</button>
-					</Popover>
-				)}
+							<Popover
+								isOpen={showingTooltip}
+								positions={["right", "left", "top", "bottom"]}
+								content={
+									<div className="flex items-center ml-1">
+										<div className="bg-black rotate-45 h-[10px] w-[10px] mr-[-5px]"></div>
+										<span className="px-2 py-1 bg-black text-white z-40 rounded text-sm">
+											Add tag
+										</span>
+									</div>
+								}
+							>
+								<button
+									onClick={
+										addingTag === photoId
+											? handleClearButtonClick
+											: handleAddTag
+									}
+									className="bg-white/40 hover:bg-white/75  z-20 backdrop-blur h-7 w-7 rounded-sm shadow shadow-black/25 hover:shadow-black/50 transition-all flex items-center justify-center aspect-square relative"
+									onMouseEnter={startTooltipTimer}
+									onMouseLeave={clearTooltipTimer}
+								>
+									{addingTag === photoId ? (
+										searchValue ? (
+											<i className="fa-regular fa-circle-xmark text-[12px]"></i>
+										) : (
+											<i className="fa-solid fa-angle-right text-[12px]"></i>
+										)
+									) : (
+										<i className="fa-solid fa-tag w-3"></i>
+									)}
+								</button>
+							</Popover>
+						</motion.div>
+					)}
+				</AnimatePresence>
 			</div>
 		);
 	}
