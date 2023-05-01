@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Photo from "../types/Photo";
 import { motion, AnimatePresence } from "framer-motion";
 import PhotoTagger from "./PhotoTagger";
 
 export default function PhotoCard({
+	addingTag,
+	setAddingTag,
 	handleItemClick,
 	handleDelete,
 	handleFullscreen,
 	photo,
 }: {
+	addingTag: string | null;
+	setAddingTag: React.Dispatch<React.SetStateAction<string | null>>;
 	handleItemClick: (
 		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
 		photo: Photo
@@ -25,12 +29,11 @@ export default function PhotoCard({
 	photo: Photo;
 }) {
 	const [isHovered, setIsHovered] = useState<boolean>(false);
-	const [addingTag, setAddingTag] = useState<boolean>(false);
 
 	const handleCardClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		e.stopPropagation();
 		handleItemClick(e, photo);
-		setAddingTag(false);
+		setAddingTag(null);
 	};
 
 	return (
@@ -54,6 +57,7 @@ export default function PhotoCard({
 					tag={photo.tag}
 					addingTag={addingTag}
 					setAddingTag={setAddingTag}
+					isHovered={isHovered}
 				/>
 
 				<AnimatePresence>
@@ -67,13 +71,13 @@ export default function PhotoCard({
 						>
 							<div
 								onClick={(e) => handleFullscreen(e, photo)}
-								className="rounded-sm h-6 w-6 bg-white/80 hover:bg-white transition-all flex items-center justify-center"
+								className="shadow shadow-black/25 rounded-sm h-6 w-6 bg-white/40 backdrop-blur hover:bg-white/75 transition-all flex items-center justify-center"
 							>
 								<i className="fa-solid fa-expand text-[16px] text-black/80 hover:text-black"></i>
 							</div>
 							<div
 								onClick={(e) => handleDelete(e, photo)}
-								className="rounded-sm h-6 w-6 bg-white/60 hover:bg-white transition-all flex items-center justify-center"
+								className="shadow shadow-black/25 hover:shadow-black/40 rounded-sm h-6 w-6 bg-white/40 hover:bg-white/75 backdrop-blur transition-all flex items-center justify-center"
 							>
 								<i className="fa-solid fa-trash text-[12px] text-black/80 hover:text-black"></i>
 							</div>

@@ -6,7 +6,6 @@ export default function getActions(
 	selected: Photo[],
 	setSelected: (selected: Photo[]) => void
 ) {
-
 	const actions = [
 		{
 			text: "Deselect",
@@ -29,9 +28,9 @@ export default function getActions(
 
 				setSelected(photos);
 
-				console.log(photos)
-			}
-		},
+				console.log(photos);
+			},
+		}
 	];
 
 	const filteredActions = actions.filter((action) => {

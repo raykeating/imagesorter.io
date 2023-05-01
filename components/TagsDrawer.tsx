@@ -25,9 +25,10 @@ import { useDraggable } from "@dnd-kit/core";
 import { useDroppable } from "@dnd-kit/core";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { CSS } from "@dnd-kit/utilities";
+import getNextTagColor from "@/util/getNextTagColor";
 
 export default function TagsDrawer() {
-	const [tags, setTags] = useState<Tag[]>([]);
+	const { tags, setTags } = useContext(AppContext);
 	const [tagInput, setTagInput] = useState<string>("");
 	const [draggingTagID, setDraggingTagID] = useState<string | null>(null);
 
@@ -42,11 +43,6 @@ export default function TagsDrawer() {
 		})
 	);
 
-	const [parent] = useAutoAnimate({
-		duration: 75,
-		easing: "ease-in-out",
-	});
-
 	function handleTagInput(e: React.ChangeEvent<HTMLInputElement>): void {
 		setTagInput(e.target.value);
 	}
@@ -58,7 +54,7 @@ export default function TagsDrawer() {
 		const newTag = {
 			id: uuid(),
 			text: tagInput,
-			color: tagColors[tags.length % tagColors.length],
+			color: getNextTagColor(tags),
 		};
 		setTags([...tags, newTag]);
 		setTagInput("");
@@ -104,14 +100,13 @@ export default function TagsDrawer() {
 									key={tag.id}
 									initial={{ opacity: 0, x: -10 }}
 									animate={{ opacity: 1, x: 0 }}
-									exit={{ opacity: 0, x: -10 }}
+									exit={{ opacity: 0, x: 10 }}
 									transition={{ duration: 0.1 }}
 								>
 									<SortableTag
 										key={tag.id}
 										id={tag.id}
 										tag={tag}
-										setTags={setTags}
 									/>
 								</motion.div>
 							))}

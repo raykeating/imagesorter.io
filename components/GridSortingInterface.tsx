@@ -33,6 +33,8 @@ export default function GridSortingInterface({
 }) {
 	const [draggingItemID, setDraggingItemID] = useState<string | null>(null);
 
+	const [addingTagWithId, setAddingTagWithId] = useState<string | null>(null); // tag id
+
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const handleNewImageClick = () => {
@@ -83,6 +85,8 @@ export default function GridSortingInterface({
 								<Droppable id={item.id} key={item.id}>
 									<PhotoCard
 										photo={item}
+										addingTag={addingTagWithId}
+										setAddingTag={setAddingTagWithId}
 										handleDelete={(e: any) => handleDelete(e, item)}
 										handleFullscreen={(e: any) => handleFullscreen(e, item)}
 										handleItemClick={(e: any) => handleItemClick(e, item)}

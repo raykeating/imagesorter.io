@@ -10,13 +10,46 @@ import TagSelector from "@/components/TagSelector";
 import getActions from "@/util/actions";
 import TopActionBar from "@/components/TopActionBar";
 import Drawers from "@/components/Drawers";
+import Toasts from "@/components/Toasts";
 
 export const AppContext = createContext<{
+	photos: Photo[];
+	setPhotos: React.Dispatch<React.SetStateAction<Photo[]>>;
 	tags: Tag[];
-	setTags: (tags: Tag[]) => void;
+	setTags: React.Dispatch<React.SetStateAction<Tag[]>>;
+	toasts: string[];
+	setToasts: React.Dispatch<React.SetStateAction<string[]>>;
+	confirmationDialog: {
+		isOpen: boolean;
+		title: string;
+		text: string;
+		onConfirm: () => void;
+		onCancel: () => void;
+	};
+	setConfirmationDialog: React.Dispatch<
+		React.SetStateAction<{
+			isOpen: boolean;
+			title: string;
+			text: string;
+			onConfirm: () => void;
+			onCancel: () => void;
+		}>
+	>;
 }>({
+	photos: [],
+	setPhotos: () => {},
 	tags: [],
 	setTags: () => {},
+	toasts: [],
+	setToasts: () => {},
+	confirmationDialog: {
+		isOpen: false,
+		title: "",
+		text: "",
+		onConfirm: () => {},
+		onCancel: () => {},
+	},
+	setConfirmationDialog: () => {},
 });
 
 export default function Home() {
@@ -26,6 +59,8 @@ export default function Home() {
 	const [fullSizeImage, setFullSizeImage] = useState<Photo | null>(null);
 
 	const [selectedItems, setSelectedItems] = useState<Photo[]>([]);
+
+	const [isTopBarTagSelectorOpen, setIsTopBarTagSelectorOpen] = useState<boolean>(false);
 
 	const [actions, setActions] = useState(
 		getActions(photos, setPhotos, selectedItems, setSelectedItems)
@@ -110,49 +145,119 @@ export default function Home() {
 		}
 	}, [keysPressed]);
 
+	const [toasts, setToasts] = useState<string[]>([]);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			if (toasts.length > 0) {
+				setToasts(toasts.slice(1));
+			}
+		}, 3000);
+		return () => clearInterval(interval);
+	}, [toasts]);
+
+	const [confirmationDialog, setConfirmationDialog] = useState<{
+		isOpen: boolean;
+		title: string;
+		text: string;
+		onConfirm: () => void;
+		onCancel: () => void;
+	}>({
+		isOpen: false,
+		title: "",
+		text: "",
+		onConfirm: () => {},
+		onCancel: () => {},
+	});
+
 	return (
-		<div
-			onClick={(e) => {
-				e.stopPropagation();
-				setSelectedItems([]);
+		<AppContext.Provider
+			value={{
+				photos,
+				setPhotos,
+				tags,
+				setTags,
+				toasts,
+				setToasts,
+				confirmationDialog,
+				setConfirmationDialog,
 			}}
 		>
-			<div className="flex flex-col pt-8 max-w-[1000px] mx-auto gap-2 p-4">
-				<TopActionBar
-					uploadedPhotoCount={photos.length}
-					selectedItems={selectedItems}
-					actions={actions}
-					handleFileUpload={handleFileUpload}
-				/>
-				<GridSortingInterface
-					items={photos}
-					setItems={setPhotos}
-					setFullSizeImage={(photo: Photo) => setFullSizeImage(photo)}
-					selectedItems={selectedItems}
-					setSelectedItems={setSelectedItems}
-					handleFileUpload={handleFileUpload}
-				/>
-			</div>
-
-			{/* Absolute elements and overlays */}
-			
-			<FullSizeImageOverlay
-				photo={fullSizeImage}
-				setFullSizeImage={setFullSizeImage}
-			/>
-			<AppContext.Provider
-				value={{
-					tags,
-					setTags,
+			<div
+				onClick={(e) => {
+					e.stopPropagation();
+					setSelectedItems([]);
+					setIsTopBarTagSelectorOpen(false);
 				}}
 			>
+				<div className="flex flex-col pt-8 max-w-[1000px] mx-auto gap-2 p-4">
+					<TopActionBar
+						uploadedPhotoCount={photos.length}
+						selectedItems={selectedItems}
+						actions={actions}
+						handleFileUpload={handleFileUpload}
+						isTagSelectorOpen={isTopBarTagSelectorOpen}
+						setIsTagSelectorOpen={setIsTopBarTagSelectorOpen}
+					/>
+					<GridSortingInterface
+						items={photos}
+						setItems={setPhotos}
+						setFullSizeImage={(photo: Photo) => setFullSizeImage(photo)}
+						selectedItems={selectedItems}
+						setSelectedItems={setSelectedItems}
+						handleFileUpload={handleFileUpload}
+					/>
+				</div>
+
+				{/* Absolute elements and overlays */}
+
+				<FullSizeImageOverlay
+					photo={fullSizeImage}
+					setFullSizeImage={setFullSizeImage}
+				/>
+
 				<Drawers
 					undoPhotos={undoPhotos}
 					redoPhotos={redoPhotos}
 					keysPressed={keysPressed}
 				/>
-			</AppContext.Provider>
-		</div>
+				<Toasts toasts={toasts} />
+				{confirmationDialog.isOpen && (
+					<div className="fixed top-0 left-0 w-screen h-screen bg-black/80 flex items-center justify-center z-50">
+						<div className="p-8 bg-white/90 backdrop-blur rounded items-center justify-center flex flex-col gap-3 max-w-[700px]">
+							<h3 className="font-bold text-lg">{confirmationDialog.title}</h3>
+							<p>{confirmationDialog.text}</p>
+							<div className="flex gap-1 mt-1">
+								<button
+									className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+									onClick={() => {
+										confirmationDialog.onConfirm();
+										setConfirmationDialog({
+											...confirmationDialog,
+											isOpen: false,
+										});
+									}}
+								>
+									Confirm
+								</button>
+								<button
+									className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
+									onClick={() => {
+										confirmationDialog.onCancel();
+										setConfirmationDialog({
+											...confirmationDialog,
+											isOpen: false,
+										});
+									}}
+								>
+									Cancel
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
+			</div>
+		</AppContext.Provider>
 	);
 }
 

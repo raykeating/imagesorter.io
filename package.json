@@ -27,6 +27,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.2.0",
+    "react-tiny-popover": "^7.2.4",
     "sortablejs": "^1.15.0",
     "typescript": "4.9.4",
     "uuid": "^9.0.0"

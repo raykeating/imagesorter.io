@@ -3,20 +3,40 @@
 @tailwind utilities;
 
 * {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
 }
 
 html,
 body {
-  max-width: 100vw;
-  min-height: 100vh;
-  background-color: #18181b; /* zinc-900 */
-  font-family: 'Inter', sans-serif;
+	max-width: 100vw;
+	min-height: 100vh;
+	background-color: #18181b; /* zinc-900 */
+	font-family: "Montserrat", sans-serif;
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+	color: inherit;
+	text-decoration: none;
+}
+
+/* width */
+.minimal-scrollbar::-webkit-scrollbar {
+	width: 5px;
+}
+
+/* Track */
+.minimal-scrollbar::-webkit-scrollbar-track {
+	background: #f1f1f1;
+}
+
+/* Handle */
+.minimal-scrollbar::-webkit-scrollbar-thumb {
+	background: #888;
+}
+
+/* Handle on hover */
+.minimal-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: #555;
 }
