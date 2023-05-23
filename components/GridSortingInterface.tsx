@@ -7,6 +7,7 @@ import {
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
+import { restrictToWindowEdges, snapCenterToCursor } from "@dnd-kit/modifiers";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
 import PhotoCard from "./PhotoCard";
@@ -33,6 +34,8 @@ export default function GridSortingInterface({
 }) {
 	const [draggingItemID, setDraggingItemID] = useState<string | null>(null);
 
+	const [numColumns, setNumColumns] = useState<ColumnCount>(3);
+
 	const [addingTagWithId, setAddingTagWithId] = useState<string | null>(null); // tag id
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,10 +58,10 @@ export default function GridSortingInterface({
 		})
 	);
 
-	const [parent] = useAutoAnimate({
-		duration: 75,
-		easing: "ease-in-out",
-	});
+	// const [parent] = useAutoAnimate({
+	// 	duration: 75,
+	// 	easing: "ease-in-out",
+	// });
 
 	return (
 		<div
@@ -67,35 +70,36 @@ export default function GridSortingInterface({
 		>
 			<div className="mx-auto overflow-visible">
 				{/* grid of cards */}
-				<ul className="grid grid-cols-4 gap-4 overflow-visible" ref={parent}>
+				<ul className="grid grid-cols-4 gap-4 overflow-visible" >
 					<DndContext
 						sensors={sensors}
 						collisionDetection={closestCenter}
 						onDragEnd={handleDragEnd}
 						onDragStart={handleDragStart}
+						modifiers={[restrictToWindowEdges, snapCenterToCursor]}
 					>
-						{items.map((item) => (
-							<Draggable
-								id={item.id}
-								key={item.id}
-								selectedItems={selectedItems}
-								draggingItemID={draggingItemID}
-								item={item}
-							>
-								<Droppable id={item.id} key={item.id}>
-									<PhotoCard
-										photo={item}
-										addingTag={addingTagWithId}
-										setAddingTag={setAddingTagWithId}
-										handleDelete={(e: any) => handleDelete(e, item)}
-										handleFullscreen={(e: any) => handleFullscreen(e, item)}
-										handleItemClick={(e: any) => handleItemClick(e, item)}
-									/>
-								</Droppable>
-							</Draggable>
-
-							// s
-						))}
+						{items.map((item) => {
+							return (
+								<Draggable
+									id={item.id}
+									key={item.id}
+									selectedItems={selectedItems}
+									draggingItemID={draggingItemID}
+									item={item}
+								>
+									<Droppable id={item.id} key={item.id}>
+										<PhotoCard
+											photo={item}
+											addingTag={addingTagWithId}
+											setAddingTag={setAddingTagWithId}
+											handleDelete={(e: any) => handleDelete(e, item)}
+											handleFullscreen={(e: any) => handleFullscreen(e, item)}
+											handleItemClick={(e: any) => handleItemClick(e, item)}
+										/>
+									</Droppable>
+								</Draggable>
+							);
+						})}
 					</DndContext>
 
 					{/* button to upload new photos */}
@@ -104,7 +108,7 @@ export default function GridSortingInterface({
 						style={{ display: "none" }}
 						ref={fileInputRef}
 						onChange={handleFileUpload}
-            multiple
+						multiple
 					/>
 					<button
 						className="w-full rounded aspect-square bg-white/25 cursor-pointer hover:bg-white/40 transition-colors"
@@ -115,6 +119,7 @@ export default function GridSortingInterface({
 						</div>
 					</button>
 				</ul>
+				
 			</div>
 		</div>
 	);
@@ -245,7 +250,7 @@ function Draggable({
 			{...attributes}
 		>
 			<div
-				className={`cursor-pointer border-2 border-white rounded overflow-hidden ${
+				className={`cursor-pointer border-2 border-white rounded ${
 					!selectedItems.includes(item) && "border-opacity-0"
 				} ${
 					draggingItemID && draggingItemID === item.id && "border-opacity-100"
