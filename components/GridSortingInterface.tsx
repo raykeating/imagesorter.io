@@ -34,8 +34,6 @@ export default function GridSortingInterface({
 }) {
 	const [draggingItemID, setDraggingItemID] = useState<string | null>(null);
 
-	const [numColumns, setNumColumns] = useState<ColumnCount>(3);
-
 	const [addingTagWithId, setAddingTagWithId] = useState<string | null>(null); // tag id
 
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -76,7 +74,8 @@ export default function GridSortingInterface({
 						collisionDetection={closestCenter}
 						onDragEnd={handleDragEnd}
 						onDragStart={handleDragStart}
-						modifiers={[restrictToWindowEdges, snapCenterToCursor]}
+						onDragOver={handleDragOver}
+						modifiers={[restrictToWindowEdges]}
 					>
 						{items.map((item) => {
 							return (
@@ -100,6 +99,7 @@ export default function GridSortingInterface({
 								</Draggable>
 							);
 						})}
+						
 					</DndContext>
 
 					{/* button to upload new photos */}
@@ -162,6 +162,12 @@ export default function GridSortingInterface({
 	}
 	function handleDragStart(event: any) {
 		setDraggingItemID(event.active.id);
+	}
+
+	function handleDragOver(event: any) {
+		const { active, over } = event;
+		if (!over || !active) return;
+		
 	}
 
 	function handleItemClick(event: any, item: any) {

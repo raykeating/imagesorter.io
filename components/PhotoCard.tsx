@@ -3,15 +3,21 @@ import Image from "next/image";
 import Photo from "../types/Photo";
 import { motion, AnimatePresence } from "framer-motion";
 import PhotoTagger from "./PhotoTagger";
+import { forwardRef } from "react";
 
 export default function PhotoCard({
+	sortableRef,
+	sortableStyle,
 	addingTag,
 	setAddingTag,
 	handleItemClick,
 	handleDelete,
 	handleFullscreen,
 	photo,
+	...props
 }: {
+	sortableRef: any;
+	sortableStyle: any;
 	addingTag: string | null;
 	setAddingTag: React.Dispatch<React.SetStateAction<string | null>>;
 	handleItemClick: (
@@ -38,11 +44,13 @@ export default function PhotoCard({
 
 	return (
 		<div
-			style={{ touchAction: "none" }}
+			style={{ touchAction: "none", ...sortableStyle }}
 			className={`relative select-none  p-1 text-3xl text-gray-900 font-bold aspect-square shadow w-full`}
 			onClick={handleCardClick}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
+			ref={sortableRef}
+			{...props}
 		>
 			<Image
 				src={photo.fileUrl}

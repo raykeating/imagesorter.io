@@ -2,11 +2,10 @@ import React, { useState, useEffect, createContext } from "react";
 import { Tag } from "@/types/Photo";
 import Photo from "@/types/Photo";
 import { v4 as uuid } from "uuid";
-import GridSortingInterface from "@/components/GridSortingInterface";
+import NewGridSortingInterface from "@/components/NewGridSortingInterface";
 import FullSizeImageOverlay from "@/components/FullSizeImageOverlay";
 import useUndoableState from "@/util/hooks/useUndoableState";
 import UndoButtons from "@/components/UndoButtons";
-import TagSelector from "@/components/TagSelector";
 import getActions from "@/util/actions";
 import TopActionBar from "@/components/TopActionBar";
 import Drawers from "@/components/Drawers";
@@ -54,6 +53,7 @@ export const AppContext = createContext<{
 
 export default function Home() {
 	const [tags, setTags] = useState<Tag[]>([]);
+	const [addingTagWithId, setAddingTagWithId] = useState<string | null>(null); // tag id
 
 	const [photos, setPhotos, undoPhotos, redoPhotos] = useUndoableState([]);
 	const [fullSizeImage, setFullSizeImage] = useState<Photo | null>(null);
@@ -199,13 +199,18 @@ export default function Home() {
 						isTagSelectorOpen={isTopBarTagSelectorOpen}
 						setIsTagSelectorOpen={setIsTopBarTagSelectorOpen}
 					/>
-					<GridSortingInterface
+					<NewGridSortingInterface
 						items={photos}
 						setItems={setPhotos}
 						setFullSizeImage={(photo: Photo) => setFullSizeImage(photo)}
 						selectedItems={selectedItems}
 						setSelectedItems={setSelectedItems}
 						handleFileUpload={handleFileUpload}
+						addingTagWithId={addingTagWithId}
+						setAddingTagWithId={setAddingTagWithId}
+						handleDelete={(e: any, photo: Photo) => null}
+						handleFullscreen={(e: any, photo: Photo) => null}
+						handleItemClick={(e: any, photo: Photo) => null}
 					/>
 				</div>
 
