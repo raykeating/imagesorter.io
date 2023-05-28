@@ -15,6 +15,7 @@ import {
 	SortableContext,
 	rectSortingStrategy,
 } from "@dnd-kit/sortable";
+import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 import { SortablePhoto } from "./SortablePhoto";
 
@@ -53,15 +54,23 @@ export default function NewGridSortingInterface({
     ) => void;
 }) {
 	const [activeId, setActiveId] = useState(null);
-	const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+	const sensors = useSensors(useSensor(MouseSensor, {
+        activationConstraint: {
+            distance: 5,
+        }
+    }), useSensor(TouchSensor, {
+        activationConstraint: {
+            distance: 5,
+        }
+    }));
 
 	return (
 		<DndContext
 			sensors={sensors}
 			collisionDetection={closestCenter}
-			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
-			onDragCancel={handleDragCancel}
+            onDragStart={handleDragStart}
+            modifiers={[restrictToWindowEdges]}
 		>
 			<SortableContext items={items} strategy={rectSortingStrategy}>
 				<div className="grid grid-cols-4">
@@ -95,24 +104,35 @@ export default function NewGridSortingInterface({
 		</DndContext>
 	);
 
-    function handleDragStart(event: any) {
-        setActiveId(event.active.id);
-      }
-    
-      function handleDragEnd(event: any) {
-        const {active, over} = event;
-    
-        if (active.id !== over.id) {
-          setItems((items) => {
-            const oldIndex = items.indexOf(active.id);
-            const newIndex = items.indexOf(over.id);
-    
-            return arrayMove(items, oldIndex, newIndex);
-          });
-        }
-    
-        setActiveId(null);
-      }
+    function handleDragEnd(event: any) {
+		const { active, over } = event;
+		if (!over || !active) return;
+
+		if (active.id !== over.id && selectedItems.length <= 1) {
+			const newItems = arrayMove(
+				items,
+				items.findIndex((p) => p.id === active.id),
+				items.findIndex((p) => p.id === over.id)
+			);
+			setItems(newItems);
+		} else if (!selectedItems.includes(over.id) && selectedItems.length > 1) {
+			const newItems = [...items];
+			const moveToIndex = newItems.findIndex((p) => p.id === over.id);
+			const selectedItemsCopy = [...selectedItems];
+			selectedItemsCopy.forEach((item) => {
+				const itemIndex = newItems.findIndex((p) => p.id === item.id);
+				newItems.splice(itemIndex, 1);
+			});
+
+			newItems.splice(moveToIndex, 0, ...selectedItemsCopy);
+
+			setItems(newItems);
+		}
+		setActiveId(null);
+	}
+	function handleDragStart(event: any) {
+		setActiveId(event.active.id);
+	}
     
       function handleDragCancel() {
         setActiveId(null);

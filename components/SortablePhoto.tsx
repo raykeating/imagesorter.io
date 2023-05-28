@@ -36,7 +36,7 @@ export const SortablePhoto = ({
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
-		transition,
+		// transition,
 	};
 
 	return (

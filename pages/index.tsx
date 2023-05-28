@@ -208,9 +208,9 @@ export default function Home() {
 						handleFileUpload={handleFileUpload}
 						addingTagWithId={addingTagWithId}
 						setAddingTagWithId={setAddingTagWithId}
-						handleDelete={(e: any, photo: Photo) => null}
-						handleFullscreen={(e: any, photo: Photo) => null}
-						handleItemClick={(e: any, photo: Photo) => null}
+						handleDelete={handleDelete}
+						handleFullscreen={handleFullscreen}
+						handleItemClick={handleItemClick}
 					/>
 				</div>
 
@@ -264,20 +264,48 @@ export default function Home() {
 			</div>
 		</AppContext.Provider>
 	);
+
+	function handleItemClick(event: any, item: any) {
+		// if the user is holding down the shift+control keys, add the item to the list
+		if (event.ctrlKey) {
+			setSelectedItems((items) => [...items, item]);
+		} else if (event.shiftKey) {
+			// if the user is holding down the shift key, add all the items between the last selected item and the current item to the list
+			const lastSelectedItem = selectedItems[selectedItems.length - 1];
+			const lastSelectedItemIndex = photos.indexOf(lastSelectedItem);
+			const currentItemIndex = photos.indexOf(item);
+
+			if (lastSelectedItemIndex > currentItemIndex) {
+				setSelectedItems(
+					photos.slice(currentItemIndex, lastSelectedItemIndex + 1)
+				);
+			} else {
+				setSelectedItems(
+					photos.slice(lastSelectedItemIndex, currentItemIndex + 1)
+				);
+			}
+		} else if (selectedItems.length === 1 && selectedItems[0] === item) {
+			// if the user clicks on the same item, deselect it
+			setSelectedItems([]);
+		} else {
+			// otherwise, select the item
+			setSelectedItems([item]);
+		}
+
+		event.stopPropagation();
+	}
+
+	function handleFullscreen(e: any, item: any) {
+		e.stopPropagation();
+		setFullSizeImage(item);
+	}
+
+	function handleDelete(e: any, item: any) {
+		e.stopPropagation();
+		setPhotos((photos: Photo[]) => photos.filter((p) => p.id !== item.id));
+	}
 }
 
-function handleRearrange(
-	items: Photo[],
-	setItems: (items: Photo[]) => void
-): void {
-	// randomize the order of the items
-	const newItems = [...items];
-	for (let i = newItems.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[newItems[i], newItems[j]] = [newItems[j], newItems[i]];
-	}
-	setItems(newItems);
-}
 
 // const getPredictionsFromTags = async (
 // 	photos: Photo[],
