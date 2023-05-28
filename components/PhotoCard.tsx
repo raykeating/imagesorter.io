@@ -45,7 +45,7 @@ export default function PhotoCard({
 	return (
 		<div
 			style={{ touchAction: "none", ...sortableStyle }}
-			className={`relative select-none  p-1 text-3xl text-gray-900 font-bold aspect-square shadow w-full`}
+			className={`rounded overflow-hidden relative select-none  p-1 text-3xl text-gray-900 font-bold aspect-square shadow w-full`}
 			onClick={handleCardClick}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}

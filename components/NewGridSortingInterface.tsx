@@ -18,6 +18,8 @@ import {
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 import { SortablePhoto } from "./SortablePhoto";
+import PhotoCard from "./PhotoCard";
+import Image from "next/image";
 
 export default function NewGridSortingInterface({
 	items,
@@ -26,11 +28,11 @@ export default function NewGridSortingInterface({
 	selectedItems,
 	setSelectedItems,
 	handleFileUpload,
-    addingTagWithId,
-    setAddingTagWithId,
-    handleDelete,
-    handleFullscreen,
-    handleItemClick,
+	addingTagWithId,
+	setAddingTagWithId,
+	handleDelete,
+	handleFullscreen,
+	handleItemClick,
 }: {
 	items: Photo[];
 	setItems: React.Dispatch<React.SetStateAction<any[]>>;
@@ -38,73 +40,102 @@ export default function NewGridSortingInterface({
 	selectedItems: any[];
 	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    addingTagWithId: string | null;
-    setAddingTagWithId: React.Dispatch<React.SetStateAction<string | null>>;
-    handleDelete: (
-        e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-        photo: Photo
-    ) => void;
-    handleFullscreen: (
-        e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-        photo: Photo
-    ) => void;
-    handleItemClick: (
-        e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-        photo: Photo
-    ) => void;
+	addingTagWithId: string | null;
+	setAddingTagWithId: React.Dispatch<React.SetStateAction<string | null>>;
+	handleDelete: (
+		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+		photo: Photo
+	) => void;
+	handleFullscreen: (
+		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+		photo: Photo
+	) => void;
+	handleItemClick: (
+		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+		photo: Photo
+	) => void;
 }) {
 	const [activeId, setActiveId] = useState(null);
-	const sensors = useSensors(useSensor(MouseSensor, {
-        activationConstraint: {
-            distance: 5,
-        }
-    }), useSensor(TouchSensor, {
-        activationConstraint: {
-            distance: 5,
-        }
-    }));
+	const sensors = useSensors(
+		useSensor(MouseSensor, {
+			activationConstraint: {
+				distance: 5,
+			},
+		}),
+		useSensor(TouchSensor, {
+			activationConstraint: {
+				distance: 5,
+			},
+		})
+	);
 
 	return (
 		<DndContext
 			sensors={sensors}
 			collisionDetection={closestCenter}
 			onDragEnd={handleDragEnd}
-            onDragStart={handleDragStart}
-            modifiers={[restrictToWindowEdges]}
+			onDragStart={handleDragStart}
+			modifiers={[restrictToWindowEdges]}
 		>
 			<SortableContext items={items} strategy={rectSortingStrategy}>
-				<div className="grid grid-cols-4">
-					{items.map((item) => (
+				<div className="grid grid-cols-4 gap-2">
+					{items.map((item, index) => (
 						<SortablePhoto
-                            id={item.id}
-                            photo={item}
-                            addingTag={addingTagWithId}
-                            setAddingTag={setAddingTagWithId}
-                            handleDelete={(e: any) => handleDelete(e, item)}
-                            handleFullscreen={(e: any) => handleFullscreen(e, item)}
-                            handleItemClick={(e: any) => handleItemClick(e, item)}
-                        />
+							id={item.id}
+                            index={index}
+							photo={item}
+							selected={selectedItems.includes(item)}
+                            selectedItemsLength={selectedItems.length}
+							active={activeId === item.id}
+							addingTag={addingTagWithId}
+							setAddingTag={setAddingTagWithId}
+							handleDelete={(e: any) => handleDelete(e, item)}
+							handleFullscreen={(e: any) => handleFullscreen(e, item)}
+							handleItemClick={(e: any) => handleItemClick(e, item)}
+						/>
 					))}
 				</div>
 			</SortableContext>
 
 			<DragOverlay adjustScale={true}>
-				{(activeId && items.some(item => item.id === activeId)) ? (
-					<SortablePhoto
-                        id={activeId}
-                        photo={items.find((item) => item.id === activeId) as Photo}
-                        addingTag={addingTagWithId}
-                        setAddingTag={setAddingTagWithId}
-                        handleDelete={(e: any) => handleDelete(e, items.find((item) => item.id === activeId) as Photo)}
-                        handleFullscreen={(e: any) => handleFullscreen(e, items.find((item) => item.id === activeId) as Photo)}
-                        handleItemClick={(e: any) => handleItemClick(e, items.find((item) => item.id === activeId) as Photo)}
-                    />
-				) : null}
+				<div className="relative scale-75">
+					<span className="z-50 bg-red-600 text-white rounded-full absolute -left-1 -top-1 w-7 h-7 flex items-center justify-center">
+						{selectedItems.length}
+					</span>
+					{activeId && items.some((item) => item.id === activeId) ? (
+						<div className="relative h-[200px] w-[200px] bg-blue-300">
+							{selectedItems.sort(
+                                // active item should be on top (last)
+                                (a, b) => (a.id === activeId ? 1 : 0) - (b.id === activeId ? 1 : 0)
+                            ).map((item) => {
+								return (
+									<Image
+										src={item.fileUrl}
+										alt={item.filename}
+										width={100}
+										height={100}
+										style={{
+											position: "absolute",
+											top: 0,
+											left: 0,
+											width: "100%",
+											height: "100%",
+											objectFit: "cover",
+											borderRadius: "4px",
+                                            boxShadow: "0 0 0 2px #fff",
+											transform: `rotate(${Math.random() * 8 - 4}deg)`,
+										}}
+									/>
+								);
+							})}
+						</div>
+					) : null}
+				</div>
 			</DragOverlay>
 		</DndContext>
 	);
 
-    function handleDragEnd(event: any) {
+	function handleDragEnd(event: any) {
 		const { active, over } = event;
 		if (!over || !active) return;
 
@@ -133,8 +164,8 @@ export default function NewGridSortingInterface({
 	function handleDragStart(event: any) {
 		setActiveId(event.active.id);
 	}
-    
-      function handleDragCancel() {
-        setActiveId(null);
-      }
+
+	function handleDragCancel() {
+		setActiveId(null);
+	}
 }
