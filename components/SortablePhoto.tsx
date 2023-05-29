@@ -63,7 +63,7 @@ export const SortablePhoto = ({
                 {...listeners}
 		    />
             {
-                (isOver) && (
+                (isOver && selectedItemsLength > 1) && (
                     <div className="z-40 absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
                         <span className="text-white text-2xl font-bold">+{selectedItemsLength - 1}</span>
                     </div>

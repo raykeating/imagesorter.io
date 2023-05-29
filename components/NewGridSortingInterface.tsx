@@ -75,6 +75,7 @@ export default function NewGridSortingInterface({
 			collisionDetection={closestCenter}
 			onDragEnd={handleDragEnd}
 			onDragStart={handleDragStart}
+			onDragCancel={handleDragCancel}
 			modifiers={[restrictToWindowEdges]}
 		>
 			<SortableContext items={items} strategy={rectSortingStrategy}>
@@ -99,15 +100,16 @@ export default function NewGridSortingInterface({
 
 			<DragOverlay adjustScale={true}>
 				<div className="relative scale-75">
-					<span className="z-50 bg-red-600 text-white rounded-full absolute -left-1 -top-1 w-7 h-7 flex items-center justify-center">
+					{ selectedItems.length > 1 ? <span className="z-50 bg-red-600 text-white rounded-full absolute -left-1 -top-1 w-7 h-7 flex items-center justify-center">
 						{selectedItems.length}
-					</span>
+					</span> : null}
 					{activeId && items.some((item) => item.id === activeId) ? (
-						<div className="relative h-[200px] w-[200px] bg-blue-300">
-							{selectedItems.sort(
-                                // active item should be on top (last)
-                                (a, b) => (a.id === activeId ? 1 : 0) - (b.id === activeId ? 1 : 0)
-                            ).map((item) => {
+						<div className="relative h-[200px] w-[200px]">
+							{selectedItems.concat(
+								// add the active item to the end of the array
+								// so that it is rendered on top
+								items.find((item) => item.id === activeId)
+							).map((item) => {
 								return (
 									<Image
 										src={item.fileUrl}
@@ -123,7 +125,7 @@ export default function NewGridSortingInterface({
 											objectFit: "cover",
 											borderRadius: "4px",
                                             boxShadow: "0 0 0 2px #fff",
-											transform: `rotate(${Math.random() * 8 - 4}deg)`,
+											transform: (selectedItems.length > 1) ? `rotate(${Math.random() * 8 - 4}deg)` : "none",
 										}}
 									/>
 								);
