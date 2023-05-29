@@ -275,21 +275,23 @@ export default function Home() {
 			const lastSelectedItemIndex = photos.indexOf(lastSelectedItem);
 			const currentItemIndex = photos.indexOf(item);
 
-			if (lastSelectedItemIndex > currentItemIndex) {
-				setSelectedItems(
-					photos.slice(currentItemIndex, lastSelectedItemIndex + 1)
-				);
+			if (lastSelectedItemIndex < currentItemIndex) {
+				setSelectedItems((items) => [
+					...items,
+					...photos.slice(lastSelectedItemIndex + 1, currentItemIndex + 1),
+				]);
 			} else {
-				setSelectedItems(
-					photos.slice(lastSelectedItemIndex, currentItemIndex + 1)
-				);
+				setSelectedItems((items) => [
+					...items,
+					...photos.slice(currentItemIndex, lastSelectedItemIndex),
+				]);
 			}
 		} else if (selectedItems.length === 1 && selectedItems[0] === item) {
 			// if the user clicks on the same item, deselect it
 			setSelectedItems([]);
 		} else {
 			// otherwise, select the item
-			setSelectedItems([item]);
+			setSelectedItems(items => [item]);
 		}
 
 		event.stopPropagation();
