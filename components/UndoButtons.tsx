@@ -1,27 +1,54 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 type Props = {
   undoPhotos: () => void;
   redoPhotos: () => void;
-  keysPressed: {
-    control: boolean;
-    shift: boolean;
-    lowerZ: boolean;
-    upperZ: boolean;
-  };
 };
 
 export default function UndoButtons({
   undoPhotos,
   redoPhotos,
-  keysPressed,
 }: Props) {
+
+  const [undoHighlight, setUndoHighlight] = React.useState<boolean>(false);
+  const [redoHighlight, setRedoHighlight] = React.useState<boolean>(false);
+
+  // call undo or redo when control+z or command+z is pressed
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (
+				(e.key === "z" && (e.metaKey || e.ctrlKey)) ||
+				(e.key === "Z" && e.metaKey)
+			) {
+				if (e.shiftKey) {
+          redoPhotos();
+          setRedoHighlight(true);
+          setTimeout(() => {
+            setRedoHighlight(false);
+          }, 600);
+				} else {
+					undoPhotos();
+          setUndoHighlight(true);
+          setTimeout(() => {
+            setUndoHighlight(false);
+          }, 600);
+				}
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown);
+		};
+	}, []);
+
   return (
     <div className="flex">
       <div
         onClick={undoPhotos}
         className={`z-20 hover:opacity-100 cursor-pointer px-2 ${
-          keysPressed.control && keysPressed.lowerZ
+          undoHighlight
             ? "opacity-100"
             : "opacity-60"
         }`}
@@ -31,7 +58,7 @@ export default function UndoButtons({
       <div
         onClick={redoPhotos}
         className={`z-20 hover:opacity-100 cursor-pointer px-2 ${
-          keysPressed.control && keysPressed.shift && keysPressed.upperZ
+          redoHighlight
             ? "opacity-100"
             : "opacity-60"
         }`}

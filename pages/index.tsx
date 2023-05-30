@@ -60,7 +60,8 @@ export default function Home() {
 
 	const [selectedItems, setSelectedItems] = useState<Photo[]>([]);
 
-	const [isTopBarTagSelectorOpen, setIsTopBarTagSelectorOpen] = useState<boolean>(false);
+	const [isTopBarTagSelectorOpen, setIsTopBarTagSelectorOpen] =
+		useState<boolean>(false);
 
 	const [actions, setActions] = useState(
 		getActions(photos, setPhotos, selectedItems, setSelectedItems)
@@ -68,10 +69,17 @@ export default function Home() {
 
 	const [keysPressed, setKeysPressed] = useState<{
 		control: boolean;
+		meta: boolean;
 		lowerZ: boolean;
 		upperZ: boolean;
 		shift: boolean;
-	}>({ control: false, lowerZ: false, upperZ: false, shift: false });
+	}>({
+		control: false,
+		meta: false,
+		lowerZ: false,
+		upperZ: false,
+		shift: false,
+	});
 
 	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files;
@@ -106,6 +114,8 @@ export default function Home() {
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.key === "Control") {
 				setKeysPressed({ ...keysPressed, control: true });
+			} else if (e.key === "Meta") {
+				setKeysPressed({ ...keysPressed, meta: true });
 			} else if (e.key === "Shift") {
 				setKeysPressed({ ...keysPressed, shift: true });
 			} else if (e.key === "z") {
@@ -118,6 +128,8 @@ export default function Home() {
 		const handleKeyUp = (e: KeyboardEvent) => {
 			if (e.key === "Control") {
 				setKeysPressed({ ...keysPressed, control: false });
+			} else if (e.key === "Meta") {
+				setKeysPressed({ ...keysPressed, meta: false, lowerZ: false });
 			} else if (e.key === "Shift") {
 				setKeysPressed({ ...keysPressed, shift: false });
 			} else if (e.key === "z") {
@@ -135,16 +147,7 @@ export default function Home() {
 			window.removeEventListener("keyup", handleKeyUp);
 		};
 	}, [keysPressed]);
-
-	// undo/redo with ctrl+z, ctrl+shift+z
-	useEffect(() => {
-		if (keysPressed.control && keysPressed.lowerZ) {
-			undoPhotos();
-		} else if (keysPressed.control && keysPressed.shift && keysPressed.upperZ) {
-			redoPhotos();
-		}
-	}, [keysPressed]);
-
+		
 	const [toasts, setToasts] = useState<string[]>([]);
 
 	useEffect(() => {
@@ -224,7 +227,6 @@ export default function Home() {
 				<Drawers
 					undoPhotos={undoPhotos}
 					redoPhotos={redoPhotos}
-					keysPressed={keysPressed}
 				/>
 				<Toasts toasts={toasts} />
 				{confirmationDialog.isOpen && (
@@ -277,26 +279,31 @@ export default function Home() {
 
 			if (lastSelectedItemIndex < currentItemIndex) {
 				setSelectedItems((items) => {
-				  const uniqueItems = new Set(items);
-				  const newItems = photos.slice(lastSelectedItemIndex + 1, currentItemIndex + 1);
-				  newItems.forEach((item: Photo) => uniqueItems.add(item));
-				  return Array.from(uniqueItems);
+					const uniqueItems = new Set(items);
+					const newItems = photos.slice(
+						lastSelectedItemIndex + 1,
+						currentItemIndex + 1
+					);
+					newItems.forEach((item: Photo) => uniqueItems.add(item));
+					return Array.from(uniqueItems);
 				});
-			  } else {
+			} else {
 				setSelectedItems((items) => {
-				  const uniqueItems = new Set(items);
-				  const newItems = photos.slice(currentItemIndex, lastSelectedItemIndex);
-				  newItems.forEach((item: Photo) => uniqueItems.add(item));
-				  return Array.from(uniqueItems);
+					const uniqueItems = new Set(items);
+					const newItems = photos.slice(
+						currentItemIndex,
+						lastSelectedItemIndex
+					);
+					newItems.forEach((item: Photo) => uniqueItems.add(item));
+					return Array.from(uniqueItems);
 				});
-			  }
-			  
+			}
 		} else if (selectedItems.length === 1 && selectedItems[0] === item) {
 			// if the user clicks on the same item, deselect it
 			setSelectedItems([]);
 		} else {
 			// otherwise, select the item
-			setSelectedItems(items => [item]);
+			setSelectedItems((items) => [item]);
 		}
 
 		event.stopPropagation();
@@ -312,7 +319,6 @@ export default function Home() {
 		setPhotos((photos: Photo[]) => photos.filter((p) => p.id !== item.id));
 	}
 }
-
 
 // const getPredictionsFromTags = async (
 // 	photos: Photo[],
