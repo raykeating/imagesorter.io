@@ -10,8 +10,8 @@ export const SortablePhoto = ({
 	index,
 	photo,
 	selected, // whether or not this photo is selected
-    selectedItemsLength,
-    active, // whether or not this photo is being dragged
+	selectedItemsLength,
+	active, // whether or not this photo is being dragged
 	addingTag,
 	setAddingTag,
 	handleItemClick,
@@ -22,8 +22,8 @@ export const SortablePhoto = ({
 	index: number;
 	photo: Photo;
 	selected: boolean;
-    selectedItemsLength: number;
-    active: boolean; 
+	selectedItemsLength: number;
+	active: boolean;
 	addingTag: string | null;
 	setAddingTag: React.Dispatch<React.SetStateAction<string | null>>;
 	handleItemClick: (
@@ -62,15 +62,12 @@ export const SortablePhoto = ({
 				{...attributes}
 				{...listeners}
 			/>
-			{
-				isOver && selectedItemsLength > 1 && (
-					<div className="absolute inset-0 bg-white bg-opacity-30 z-40 flex items-center justify-center">
-						<div className="bg-red-600 text-white rounded-full p-2 absolute -top-1 -left-1 w-7 h-7 flex items-center justify-center">
-							{selectedItemsLength}
-						</div>
-					</div>
-				)
-			}
+			{isOver && selectedItemsLength > 1 && (
+				<div className="absolute inset-0 bg-black bg-opacity-30 z-40 flex gap-2 items-center justify-center text-xl text-white font-bold">
+					<p>{selectedItemsLength}</p>
+					<i className="fa-solid fa-circle-down"></i>
+				</div>
+			)}
 		</div>
 	);
 };

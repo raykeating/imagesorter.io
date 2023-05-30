@@ -126,6 +126,7 @@ export default function NewGridSortingInterface({
 										height={100}
 										style={{
 											position: "absolute",
+											opacity: 0.4,
 											top: 0,
 											left: 0,
 											width: "100%",
