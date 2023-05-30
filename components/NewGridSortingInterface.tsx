@@ -82,6 +82,7 @@ export default function NewGridSortingInterface({
 				<div className="grid grid-cols-4 gap-2">
 					{items.map((item, index) => (
 						<SortablePhoto
+							key={item.id}
 							id={item.id}
                             index={index}
 							photo={item}
@@ -108,10 +109,17 @@ export default function NewGridSortingInterface({
 							{selectedItems.concat(
 								// add the active item to the end of the array
 								// so that it is rendered on top
-								items.find((item) => item.id === activeId)
+								// item should also have a modified id
+								// to avoid key conflicts
+								{
+									...items.find((item) => item.id === activeId),
+									id: "active",
+								}
+								
 							).map((item) => {
 								return (
 									<Image
+										key={item.id}
 										src={item.fileUrl}
 										alt={item.filename}
 										width={100}
