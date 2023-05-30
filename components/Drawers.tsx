@@ -11,7 +11,7 @@ export default function Drawers({undoPhotos, redoPhotos, keysPressed}: {undoPhot
 	const [openDrawer, setOpenDrawer] = useState<DrawerType | null>("tags");
 
 	return (
-		<div className="flex flex-col fixed right-0 bottom-0 w-full">
+		<div className="flex flex-col fixed right-0 bottom-0 w-full" style={{zIndex: 999}}>
             <div className="flex justify-between items-center px-6 py-2">
                 <UndoButtons
                     undoPhotos={undoPhotos}
