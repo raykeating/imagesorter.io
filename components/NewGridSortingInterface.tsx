@@ -102,7 +102,7 @@ export default function NewGridSortingInterface({
 				<div className="relative scale-75">
 					{ selectedItems.length > 1 ? <span className="z-50 bg-red-600 text-white rounded-full absolute -left-1 -top-1 w-7 h-7 flex items-center justify-center">
 						{selectedItems.length}
-					</span> : null}
+					</span> : null }
 					{activeId && items.some((item) => item.id === activeId) ? (
 						<div className="relative h-[200px] w-[200px]">
 							{selectedItems.concat(
