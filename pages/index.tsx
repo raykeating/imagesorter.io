@@ -276,16 +276,21 @@ export default function Home() {
 			const currentItemIndex = photos.indexOf(item);
 
 			if (lastSelectedItemIndex < currentItemIndex) {
-				setSelectedItems((items) => [
-					...items,
-					...photos.slice(lastSelectedItemIndex + 1, currentItemIndex + 1),
-				]);
-			} else {
-				setSelectedItems((items) => [
-					...items,
-					...photos.slice(currentItemIndex, lastSelectedItemIndex),
-				]);
-			}
+				setSelectedItems((items) => {
+				  const uniqueItems = new Set(items);
+				  const newItems = photos.slice(lastSelectedItemIndex + 1, currentItemIndex + 1);
+				  newItems.forEach((item: Photo) => uniqueItems.add(item));
+				  return Array.from(uniqueItems);
+				});
+			  } else {
+				setSelectedItems((items) => {
+				  const uniqueItems = new Set(items);
+				  const newItems = photos.slice(currentItemIndex, lastSelectedItemIndex);
+				  newItems.forEach((item: Photo) => uniqueItems.add(item));
+				  return Array.from(uniqueItems);
+				});
+			  }
+			  
 		} else if (selectedItems.length === 1 && selectedItems[0] === item) {
 			// if the user clicks on the same item, deselect it
 			setSelectedItems([]);
