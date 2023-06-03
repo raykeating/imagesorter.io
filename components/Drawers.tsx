@@ -4,15 +4,18 @@ import DownloadDrawer from "./DownloadDrawer";
 import SettingsDrawer from "./SettingsDrawer";
 import TagsDrawer from "./TagsDrawer";
 import UndoButtons from "./UndoButtons";
+import Photo from "@/types/Photo";
 
 type DrawerType = "tags" | "settings" | "download";
 
 export default function Drawers({
 	undoPhotos,
 	redoPhotos,
+	selectedItems,
 }: {
 	undoPhotos: () => void;
 	redoPhotos: () => void;
+	selectedItems: Photo[];
 }) {
 	const [openDrawer, setOpenDrawer] = useState<DrawerType | null>("tags");
 
@@ -44,7 +47,7 @@ export default function Drawers({
 					/>
 				</div>
 			</div>
-			<Drawer>{getDrawer(openDrawer)}</Drawer>
+			<Drawer>{getDrawer(openDrawer, selectedItems)}</Drawer>
 		</div>
 	);
 }
@@ -110,14 +113,14 @@ function DrawerButton({
 	);
 }
 
-function getDrawer(type: DrawerType | null) {
+function getDrawer(type: DrawerType | null, selectedItems: Photo[]) {
 	switch (type) {
 		case "tags":
 			return <TagsDrawer />;
 		case "settings":
 			return <SettingsDrawer />;
 		case "download":
-			return <DownloadDrawer />;
+			return <DownloadDrawer selectedPhotos={selectedItems}/>;
 		default:
 			return null;
 	}

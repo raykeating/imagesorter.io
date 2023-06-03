@@ -34,6 +34,8 @@ export const AppContext = createContext<{
 			onCancel: () => void;
 		}>
 	>;
+	zoomLevel: number;
+	setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
 }>({
 	photos: [],
 	setPhotos: () => {},
@@ -49,13 +51,27 @@ export const AppContext = createContext<{
 		onCancel: () => {},
 	},
 	setConfirmationDialog: () => {},
+	zoomLevel: 5,
+	setZoomLevel: () => {},
 });
 
 export default function Home() {
 	const [tags, setTags] = useState<Tag[]>([]);
 	const [addingTagWithId, setAddingTagWithId] = useState<string | null>(null); // tag id
 
+	// useUndoableState is a custom hook that returns an array with the state, 
+	// a function to set the state, a function to undo the state, and a function 
+	// to redo the state.  It also stores the state history in local storage.
 	const [photos, setPhotos, undoPhotos, redoPhotos] = useUndoableState([]);
+
+	// load state history from local storage
+	useEffect(() => {
+		const photosFromLocalStorage = localStorage.getItem("appState");
+		if (photosFromLocalStorage) {
+			setPhotos(JSON.parse(photosFromLocalStorage));
+		}
+	}, []);
+
 	const [fullSizeImage, setFullSizeImage] = useState<Photo | null>(null);
 
 	const [selectedItems, setSelectedItems] = useState<Photo[]>([]);
@@ -80,6 +96,8 @@ export default function Home() {
 		upperZ: false,
 		shift: false,
 	});
+
+	const [zoomLevel, setZoomLevel] = useState<4 | 5 | 6 | 7 | 8>(5);
 
 	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files;
@@ -147,7 +165,7 @@ export default function Home() {
 			window.removeEventListener("keyup", handleKeyUp);
 		};
 	}, [keysPressed]);
-		
+
 	const [toasts, setToasts] = useState<string[]>([]);
 
 	useEffect(() => {
@@ -184,6 +202,8 @@ export default function Home() {
 				setToasts,
 				confirmationDialog,
 				setConfirmationDialog,
+				zoomLevel,
+				setZoomLevel,
 			}}
 		>
 			<div
@@ -227,6 +247,7 @@ export default function Home() {
 				<Drawers
 					undoPhotos={undoPhotos}
 					redoPhotos={redoPhotos}
+					selectedItems={selectedItems}
 				/>
 				<Toasts toasts={toasts} />
 				{confirmationDialog.isOpen && (

@@ -1,5 +1,7 @@
 import React, { useState, useRef } from "react";
 import Photo from "@/types/Photo";
+import { AppContext } from "@/pages";
+import { useContext } from "react";
 
 import {
 	DndContext,
@@ -56,6 +58,7 @@ export default function NewGridSortingInterface({
 	) => void;
 }) {
 	const [activeId, setActiveId] = useState(null);
+	const { zoomLevel } = useContext(AppContext);
 	const sensors = useSensors(
 		useSensor(MouseSensor, {
 			activationConstraint: {
@@ -79,7 +82,7 @@ export default function NewGridSortingInterface({
 			modifiers={[restrictToWindowEdges]}
 		>
 			<SortableContext items={items} strategy={rectSortingStrategy}>
-				<div className="grid grid-cols-4 gap-2">
+				<div className={`grid grid-cols-${zoomLevel} gap-2 pb-[150px]`}>
 					{items.map((item, index) => (
 						<SortablePhoto
 							key={item.id}

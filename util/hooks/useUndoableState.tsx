@@ -1,9 +1,16 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export default function useUndoableState(initialState: any) {
   const [state, setState] = useState(initialState);
   const historyRef = useRef([initialState]);
   const pointerRef = useRef(0);
+
+  // store the state in local storage
+  useEffect(() => {
+    if (state.length > 0) {
+      localStorage.setItem('appState', JSON.stringify(state));
+    }
+  }, [state]);
 
   const undo = useCallback(() => {
     if (pointerRef.current > 0) {
