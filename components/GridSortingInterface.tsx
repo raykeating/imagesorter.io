@@ -8,6 +8,7 @@ import {
 	useSensors,
 	closestCorners,
 } from "@dnd-kit/core";
+import { restrictToWindowEdges, snapCenterToCursor } from "@dnd-kit/modifiers";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import Photo from "@/types/Photo";
 
@@ -72,12 +73,13 @@ export default function GridSortingInterface({
 		>
 			<div className="mx-auto overflow-visible">
 				{/* grid of cards */}
-				<ul className="grid grid-cols-7 gap-1 overflow-visible">
+				<ul className="grid grid-cols-4 gap-4 overflow-visible" >
 					<DndContext
 						sensors={sensors}
 						collisionDetection={closestCenter}
 						onDragEnd={handleDragEnd}
 						onDragStart={handleDragStart}
+						modifiers={[restrictToWindowEdges, snapCenterToCursor]}
 					>
 						{items.map((item) => (
 							<Draggable
@@ -110,7 +112,7 @@ export default function GridSortingInterface({
 						style={{ display: "none" }}
 						ref={fileInputRef}
 						onChange={handleFileUpload}
-            multiple
+						multiple
 					/>
 					<button
 						className="w-full rounded aspect-square bg-white/25 cursor-pointer hover:bg-white/40 transition-colors"
@@ -121,6 +123,7 @@ export default function GridSortingInterface({
 						</div>
 					</button>
 				</ul>
+				
 			</div>
 		</div>
 	);
@@ -135,32 +138,6 @@ export default function GridSortingInterface({
 		setFullSizeImage(item);
 	}
 
-	function handleDragEnd(event: any) {
-		const { active, over } = event;
-		if (!over || !active) return;
-
-		if (active.id !== over.id && selectedItems.length <= 1) {
-			const newItems = arrayMove(
-				items,
-				items.findIndex((p) => p.id === active.id),
-				items.findIndex((p) => p.id === over.id)
-			);
-			setItems(newItems);
-		} else if (!selectedItems.includes(over.id) && selectedItems.length > 1) {
-			const newItems = [...items];
-			const moveToIndex = newItems.findIndex((p) => p.id === over.id);
-			const selectedItemsCopy = [...selectedItems];
-			selectedItemsCopy.forEach((item) => {
-				const itemIndex = newItems.findIndex((p) => p.id === item.id);
-				newItems.splice(itemIndex, 1);
-			});
-
-			newItems.splice(moveToIndex, 0, ...selectedItemsCopy);
-
-			setItems(newItems);
-		}
-		
-	}
 	function handleDragStart(event: any) {
 		setDraggingItemID(event.active.id);
 	}
@@ -266,7 +243,7 @@ function Draggable({
 			{...attributes}
 		>
 			<div
-				className={`cursor-pointer border-2 border-white rounded overflow-hidden ${
+				className={`cursor-pointer border-2 border-white rounded ${
 					!selectedItems.includes(item) && "border-opacity-0"
 				} ${
 					draggingItemID && draggingItemID === item.id && "border-opacity-100"

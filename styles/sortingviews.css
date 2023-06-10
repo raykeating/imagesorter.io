@@ -1,0 +1,9 @@
+.grid-view {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 8px;
+}
+
+.sorting-grid-item {
+    width: 100%;
+}
