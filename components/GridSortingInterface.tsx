@@ -79,7 +79,8 @@ export default function GridSortingInterface({
 						collisionDetection={closestCenter}
 						onDragEnd={handleDragEnd}
 						onDragStart={handleDragStart}
-						modifiers={[restrictToWindowEdges, snapCenterToCursor]}
+						onDragOver={handleDragOver}
+						modifiers={[restrictToWindowEdges]}
 					>
 						{items.map((item) => (
 							<Draggable
@@ -142,19 +143,10 @@ export default function GridSortingInterface({
 		setDraggingItemID(event.active.id);
 	}
 
-	function handleDragEnd(event: any) {
-		setDraggingItemID(null);
-		// const { over } = event;
-		// // when the user drags over another photo, reorganize the list of photos
-		// if (over && over.id !== draggingItemID) {
-		// 	const newItems = [...items];
-		// 	const moveToIndex = newItems.findIndex((p) => p.id === over.id);
-		// 	const draggingItemIndex = newItems.findIndex(
-		// 		(p) => p.id === draggingItemID
-		// 	);
-		// 	newItems.splice(moveToIndex, 0, newItems.splice(draggingItemIndex, 1)[0]);
-		// 	setItems(newItems);
-		// }
+	function handleDragOver(event: any) {
+		const { active, over } = event;
+		if (!over || !active) return;
+		
 	}
 
 	function handleItemClick(event: any, item: any) {

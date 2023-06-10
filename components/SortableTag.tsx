@@ -50,10 +50,6 @@ export function SortableTag({ id, tag }: { id: string; tag: TagType }) {
 		}
 	};
 
-	React.useEffect(() => {
-		console.log(photos);
-	}, [photos]);
-
 	return (
 		<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
 			<li className="rounded p-1 pl-3" style={{ backgroundColor: tag.color }}>

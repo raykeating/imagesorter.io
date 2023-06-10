@@ -1,37 +1,67 @@
 import { v4 as uuid } from "uuid";
+import supabase from "@/util/supabase";
 
 interface Tag {
 	readonly id: string;
 	text: string;
 	color: string;
-	confidence?: number;
+	confidence: number | null;
+}
+
+interface DBTag {
+	created_at: string | null;
+	id: number;
+	tag_confidence: number | null;
+	tag_text: string | null;
 }
 
 class Photo {
 	tag: Tag | null;
-	filename: string;
+	filename: string | null;
 	file: Blob | File | null;
-	fileUrl: string;
+	localFileUrl: string | null;
+	remoteFileUrl: string | null;
 	id: string;
 
 	constructor({
 		tag,
 		filename,
 		file,
-		fileUrl,
+		localFileUrl,
+		remoteFileUrl,
 		id,
 	}: {
 		tag: Tag | null;
-		filename: string;
+		filename: string | null;
 		file: Blob | File | null;
-		fileUrl: string;
+		localFileUrl: string | null;
+		remoteFileUrl: string | null;
 		readonly id: string;
 	}) {
 		this.tag = tag;
 		this.filename = filename;
-		(this.file = file), (this.fileUrl = fileUrl);
+		this.file = file;
+		this.localFileUrl = localFileUrl;
+		this.remoteFileUrl = remoteFileUrl;
 		this.id = id;
-		this.fileUrl = fileUrl;
+	}
+
+	getURL() {
+		if (this.remoteFileUrl) {
+			async () => {
+				const { data, error } = await supabase.storage
+					.from("Photos")
+					.createSignedUrl(this.remoteFileUrl as string, 15);
+				if (error) {
+					console.error(error);
+					return;
+				} else {
+					return data.signedUrl;
+				}
+			};
+		} else {
+			return this.localFileUrl;
+		}
 	}
 
 	duplicateWithNewId(): Photo {
@@ -39,7 +69,8 @@ class Photo {
 			tag: this.tag,
 			filename: this.filename,
 			file: this.file,
-			fileUrl: this.fileUrl,
+			localFileUrl: this.localFileUrl,
+			remoteFileUrl: this.remoteFileUrl,
 			id: uuid(),
 		});
 	}
@@ -47,7 +78,7 @@ class Photo {
 
 export default Photo;
 
-export type { Tag };
+export type { Tag, DBTag };
 
 export const tagColors = [
 	"#F56565",
