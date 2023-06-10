@@ -6,10 +6,13 @@ import NewGridSortingInterface from "@/components/NewGridSortingInterface";
 import FullSizeImageOverlay from "@/components/FullSizeImageOverlay";
 import useUndoableState from "@/util/hooks/useUndoableState";
 import UndoButtons from "@/components/UndoButtons";
+import UploadIndicator from "@/components/UploadIndicator";
 import getActions from "@/util/actions";
 import TopActionBar from "@/components/TopActionBar";
 import Drawers from "@/components/Drawers";
 import Toasts from "@/components/Toasts";
+import fetchPhotos from "@/util/supabase/fetchPhotos";
+import { syncTags, syncPhotos } from "@/util/supabase/syncAppState";
 
 export const AppContext = createContext<{
 	photos: Photo[];
@@ -36,6 +39,7 @@ export const AppContext = createContext<{
 	>;
 	zoomLevel: number;
 	setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
+	setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
 }>({
 	photos: [],
 	setPhotos: () => {},
@@ -53,24 +57,39 @@ export const AppContext = createContext<{
 	setConfirmationDialog: () => {},
 	zoomLevel: 5,
 	setZoomLevel: () => {},
+	setIsUploading: () => {},
 });
 
 export default function Home() {
 	const [tags, setTags] = useState<Tag[]>([]);
 	const [addingTagWithId, setAddingTagWithId] = useState<string | null>(null); // tag id
 
-	// useUndoableState is a custom hook that returns an array with the state, 
-	// a function to set the state, a function to undo the state, and a function 
+	// useUndoableState is a custom hook that returns an array with the state,
+	// a function to set the state, a function to undo the state, and a function
 	// to redo the state.  It also stores the state history in local storage.
 	const [photos, setPhotos, undoPhotos, redoPhotos] = useUndoableState([]);
 
-	// load state history from local storage
+	// load photos from database, if any
 	useEffect(() => {
-		const photosFromLocalStorage = localStorage.getItem("appState");
-		if (photosFromLocalStorage) {
-			setPhotos(JSON.parse(photosFromLocalStorage));
+		async function callFetchPhotos() {
+			const photos = await fetchPhotos();
+			setPhotos(photos);
 		}
+		callFetchPhotos();
 	}, []);
+
+	// // store the state in local storage
+	// useEffect(() => {
+	// 	// if (photos.length > 0) {
+	// 	syncPhotos(photos, setIsUploading);
+	// 	// }
+	// }, [photos]);
+
+	// useEffect(() => {
+	// 	// if (tags.length > 0) {
+	// 	syncTags(tags, setIsUploading);
+	// 	// }
+	// }, [tags]);
 
 	const [fullSizeImage, setFullSizeImage] = useState<Photo | null>(null);
 
@@ -97,7 +116,7 @@ export default function Home() {
 		shift: false,
 	});
 
-	const [zoomLevel, setZoomLevel] = useState<4 | 5 | 6 | 7 | 8>(5);
+	const [zoomLevel, setZoomLevel] = useState<number>(5);
 
 	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files;
@@ -109,7 +128,8 @@ export default function Home() {
 						tag: null,
 						filename: files[i].name,
 						file: files[i],
-						fileUrl: URL.createObjectURL(files[i]),
+						localFileUrl: URL.createObjectURL(files[i]),
+						remoteFileUrl: null,
 						id: uuid(),
 					})
 				);
@@ -166,6 +186,7 @@ export default function Home() {
 		};
 	}, [keysPressed]);
 
+	// currently, toasts are hidden behind the drawers, so they are not visible
 	const [toasts, setToasts] = useState<string[]>([]);
 
 	useEffect(() => {
@@ -191,6 +212,8 @@ export default function Home() {
 		onCancel: () => {},
 	});
 
+	const [isUploading, setIsUploading] = useState<boolean>(false);
+
 	return (
 		<AppContext.Provider
 			value={{
@@ -204,6 +227,7 @@ export default function Home() {
 				setConfirmationDialog,
 				zoomLevel,
 				setZoomLevel,
+				setIsUploading,
 			}}
 		>
 			<div
@@ -284,6 +308,7 @@ export default function Home() {
 						</div>
 					</div>
 				)}
+				<UploadIndicator isUploading={isUploading} />
 			</div>
 		</AppContext.Provider>
 	);

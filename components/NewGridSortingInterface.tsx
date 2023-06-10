@@ -123,7 +123,7 @@ export default function NewGridSortingInterface({
 								return (
 									<Image
 										key={item.id}
-										src={item.fileUrl}
+										src={item.localFileUrl}
 										alt={item.filename}
 										width={100}
 										height={100}

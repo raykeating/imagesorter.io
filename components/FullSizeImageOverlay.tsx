@@ -1,5 +1,5 @@
 import React from "react";
-import { Photo } from "../types/Photo";
+import Photo from "../types/Photo";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,8 +25,8 @@ export default function FullSizeImageOverlay({
           <div className="w-[70vw] h-[100vh] flex items-center ">
             <div className="w-full h-[60vh] relative bg-[#040404] border-2 border-white">
               <Image
-                src={photo.fileUrl}
-                alt={photo.name}
+                src={photo.localFileUrl || ""}
+                alt={photo.filename || ""}
                 style={{ objectFit: "contain" }}
                 fill
               />

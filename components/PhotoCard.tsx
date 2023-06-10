@@ -53,8 +53,8 @@ export default function PhotoCard({
 			{...props}
 		>
 			<Image
-				src={photo.fileUrl}
-				alt={photo.filename}
+				src={photo.localFileUrl || ""}
+				alt={photo.filename || ""}
 				style={{ objectFit: "cover" }}
 				className=""
 				fill

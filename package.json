@@ -14,6 +14,7 @@
     "@dnd-kit/sortable": "^7.0.2",
     "@formkit/auto-animate": "^1.0.0-beta.6",
     "@next/font": "13.1.6",
+    "@supabase/supabase-js": "^2.24.0",
     "@types/file-saver": "^2.0.5",
     "@types/node": "18.11.18",
     "@types/react": "18.0.27",
@@ -24,6 +25,7 @@
     "framer-motion": "^8.5.5",
     "jszip": "^3.10.1",
     "next": "13.1.6",
+    "next-auth": "^4.22.1",
     "react": "18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
@@ -38,6 +40,7 @@
     "@types/uuid": "^9.0.0",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",
+    "supabase": "^1.64.8",
     "tailwindcss": "^3.2.4"
   }
 }
