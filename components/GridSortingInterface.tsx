@@ -6,8 +6,10 @@ import {
 	PointerSensor,
 	useSensor,
 	useSensors,
+	closestCorners,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import Photo from "@/types/Photo";
 
 import PhotoCard from "./PhotoCard";
 
@@ -15,6 +17,7 @@ import { useDraggable } from "@dnd-kit/core";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Clipboard } from "@/types/Clipboard";
 
 export default function GridSortingInterface({
 	items,
@@ -23,6 +26,7 @@ export default function GridSortingInterface({
 	selectedItems,
 	setSelectedItems,
 	handleFileUpload,
+	clipboard,
 }: {
 	items: any[];
 	setItems: React.Dispatch<React.SetStateAction<any[]>>;
@@ -30,6 +34,7 @@ export default function GridSortingInterface({
 	selectedItems: any[];
 	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	clipboard: Clipboard;
 }) {
 	const [draggingItemID, setDraggingItemID] = useState<string | null>(null);
 
@@ -55,10 +60,10 @@ export default function GridSortingInterface({
 		})
 	);
 
-	const [parent] = useAutoAnimate({
-		duration: 75,
-		easing: "ease-in-out",
-	});
+	// const [parent] = useAutoAnimate({
+	// 	duration: 75,
+	// 	easing: "ease-in-out",
+	// });
 
 	return (
 		<div
@@ -67,7 +72,7 @@ export default function GridSortingInterface({
 		>
 			<div className="mx-auto overflow-visible">
 				{/* grid of cards */}
-				<ul className="grid grid-cols-4 gap-4 overflow-visible" ref={parent}>
+				<ul className="grid grid-cols-7 gap-1 overflow-visible">
 					<DndContext
 						sensors={sensors}
 						collisionDetection={closestCenter}
@@ -90,6 +95,7 @@ export default function GridSortingInterface({
 										handleDelete={(e: any) => handleDelete(e, item)}
 										handleFullscreen={(e: any) => handleFullscreen(e, item)}
 										handleItemClick={(e: any) => handleItemClick(e, item)}
+										inClipboard={clipboard.lastAction === "cut" && clipboard.photos.some((p) => p.id === item.id)}
 									/>
 								</Droppable>
 							</Draggable>
@@ -153,10 +159,25 @@ export default function GridSortingInterface({
 
 			setItems(newItems);
 		}
-		setDraggingItemID(null);
+		
 	}
 	function handleDragStart(event: any) {
 		setDraggingItemID(event.active.id);
+	}
+
+	function handleDragEnd(event: any) {
+		setDraggingItemID(null);
+		// const { over } = event;
+		// // when the user drags over another photo, reorganize the list of photos
+		// if (over && over.id !== draggingItemID) {
+		// 	const newItems = [...items];
+		// 	const moveToIndex = newItems.findIndex((p) => p.id === over.id);
+		// 	const draggingItemIndex = newItems.findIndex(
+		// 		(p) => p.id === draggingItemID
+		// 	);
+		// 	newItems.splice(moveToIndex, 0, newItems.splice(draggingItemIndex, 1)[0]);
+		// 	setItems(newItems);
+		// }
 	}
 
 	function handleItemClick(event: any, item: any) {

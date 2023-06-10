@@ -1,16 +1,16 @@
 import React, { useState, useEffect, createContext } from "react";
 import { Tag } from "@/types/Photo";
 import Photo from "@/types/Photo";
+import { Clipboard } from "@/types/Clipboard";
 import { v4 as uuid } from "uuid";
 import GridSortingInterface from "@/components/GridSortingInterface";
 import FullSizeImageOverlay from "@/components/FullSizeImageOverlay";
 import useUndoableState from "@/util/hooks/useUndoableState";
-import UndoButtons from "@/components/UndoButtons";
-import TagSelector from "@/components/TagSelector";
 import getActions from "@/util/actions";
 import TopActionBar from "@/components/TopActionBar";
 import Drawers from "@/components/Drawers";
 import Toasts from "@/components/Toasts";
+import { PressableKeys } from "@/types/PressableKeys";
 
 export const AppContext = createContext<{
 	photos: Photo[];
@@ -58,20 +58,29 @@ export default function Home() {
 	const [photos, setPhotos, undoPhotos, redoPhotos] = useUndoableState([]);
 	const [fullSizeImage, setFullSizeImage] = useState<Photo | null>(null);
 
+	const [clipboard, setClipboard] = useState<Clipboard>({
+		lastAction: null,
+		photos: [],
+	});
+
 	const [selectedItems, setSelectedItems] = useState<Photo[]>([]);
 
-	const [isTopBarTagSelectorOpen, setIsTopBarTagSelectorOpen] = useState<boolean>(false);
+	const [isTopBarTagSelectorOpen, setIsTopBarTagSelectorOpen] =
+		useState<boolean>(false);
 
 	const [actions, setActions] = useState(
 		getActions(photos, setPhotos, selectedItems, setSelectedItems)
 	);
 
-	const [keysPressed, setKeysPressed] = useState<{
-		control: boolean;
-		lowerZ: boolean;
-		upperZ: boolean;
-		shift: boolean;
-	}>({ control: false, lowerZ: false, upperZ: false, shift: false });
+	const [keysPressed, setKeysPressed] = useState<PressableKeys>({
+		Control: false,
+		z: false,
+		Z: false,
+		Shift: false,
+		c: false,
+		v: false,
+		x: false,
+	});
 
 	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = e.target.files;
@@ -101,30 +110,20 @@ export default function Home() {
 		setActions(getActions(photos, setPhotos, selectedItems, setSelectedItems));
 	}, [photos, selectedItems]);
 
-	// listen for key presses on control, shift, z
+	// listen for key presses
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Control") {
-				setKeysPressed({ ...keysPressed, control: true });
-			} else if (e.key === "Shift") {
-				setKeysPressed({ ...keysPressed, shift: true });
-			} else if (e.key === "z") {
-				setKeysPressed({ ...keysPressed, lowerZ: true });
-			} else if (e.key === "Z") {
-				setKeysPressed({ ...keysPressed, upperZ: true });
-			}
+			setKeysPressed((prevKeysPressed) => ({
+				...prevKeysPressed,
+				[e.key]: true,
+			}));
 		};
 
 		const handleKeyUp = (e: KeyboardEvent) => {
-			if (e.key === "Control") {
-				setKeysPressed({ ...keysPressed, control: false });
-			} else if (e.key === "Shift") {
-				setKeysPressed({ ...keysPressed, shift: false });
-			} else if (e.key === "z") {
-				setKeysPressed({ ...keysPressed, lowerZ: false });
-			} else if (e.key === "Z") {
-				setKeysPressed({ ...keysPressed, upperZ: false });
-			}
+			setKeysPressed((prevKeysPressed) => ({
+				...prevKeysPressed,
+				[e.key]: false,
+			}));
 		};
 
 		window.addEventListener("keydown", handleKeyDown);
@@ -134,14 +133,72 @@ export default function Home() {
 			window.removeEventListener("keydown", handleKeyDown);
 			window.removeEventListener("keyup", handleKeyUp);
 		};
-	}, [keysPressed]);
+	}, []);
 
 	// undo/redo with ctrl+z, ctrl+shift+z
 	useEffect(() => {
-		if (keysPressed.control && keysPressed.lowerZ) {
+		if (keysPressed.Control && keysPressed.z) {
 			undoPhotos();
-		} else if (keysPressed.control && keysPressed.shift && keysPressed.upperZ) {
+		} else if (keysPressed.Control && keysPressed.Shift && keysPressed.Z) {
 			redoPhotos();
+		}
+	}, [keysPressed]);
+
+	// copy with ctrl+c
+	useEffect(() => {
+		if (keysPressed.Control && keysPressed.c) {
+			setClipboard({
+				lastAction: "copy",
+				photos: selectedItems,
+			});
+		}
+	}, [keysPressed]);
+
+	// copy with ctrl+x
+	useEffect(() => {
+		if (keysPressed.Control && keysPressed.x) {
+			setClipboard({
+				lastAction: "cut",
+				photos: selectedItems,
+			});
+		}
+	}, [keysPressed]);
+
+	// paste with ctrl+v
+	useEffect(() => {
+		if (keysPressed.Control && keysPressed.v) {
+
+			let oldPhotos: Photo[] = [...photos];
+
+			if (clipboard.lastAction === "cut") {
+				// remove cut items
+				oldPhotos = oldPhotos.filter(
+					(item) => !clipboard.photos.map((item) => item.id).includes(item.id)
+				);
+			}
+
+			setClipboard({
+				...clipboard,
+				lastAction: "paste",
+			});
+
+			const duplicateItems = clipboard.photos.map((item) =>
+				item.duplicateWithNewId()
+			);
+			if (selectedItems.length === 0) {
+				setPhotos([...oldPhotos, ...duplicateItems]);
+			} else {
+				const selectedItemsIds = selectedItems.map((item) => item.id);
+				const selectedItemsIndex = oldPhotos.findIndex((item) =>
+					selectedItemsIds.includes(item.id)
+				);
+				const newPhotos = [
+					...oldPhotos.slice(0, selectedItemsIndex + 1),
+					...duplicateItems,
+					...oldPhotos.slice(selectedItemsIndex + 1),
+				];
+				setPhotos(newPhotos);
+			}
 		}
 	}, [keysPressed]);
 
@@ -206,6 +263,7 @@ export default function Home() {
 						selectedItems={selectedItems}
 						setSelectedItems={setSelectedItems}
 						handleFileUpload={handleFileUpload}
+						clipboard={clipboard}
 					/>
 				</div>
 

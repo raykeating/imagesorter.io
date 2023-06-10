@@ -1,3 +1,5 @@
+import { v4 as uuid } from "uuid";
+
 interface Tag {
 	readonly id: string;
 	text: string;
@@ -30,6 +32,16 @@ class Photo {
 		(this.file = file), (this.fileUrl = fileUrl);
 		this.id = id;
 		this.fileUrl = fileUrl;
+	}
+
+	duplicateWithNewId(): Photo {
+		return new Photo({
+			tag: this.tag,
+			filename: this.filename,
+			file: this.file,
+			fileUrl: this.fileUrl,
+			id: uuid(),
+		});
 	}
 }
 

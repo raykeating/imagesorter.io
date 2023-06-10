@@ -1,14 +1,10 @@
+import { PressableKeys } from "@/types/PressableKeys";
 import React from "react";
 
 type Props = {
   undoPhotos: () => void;
   redoPhotos: () => void;
-  keysPressed: {
-    control: boolean;
-    shift: boolean;
-    lowerZ: boolean;
-    upperZ: boolean;
-  };
+  keysPressed: PressableKeys;
 };
 
 export default function UndoButtons({
@@ -16,12 +12,18 @@ export default function UndoButtons({
   redoPhotos,
   keysPressed,
 }: Props) {
+
+  const btnStyle =
+		"bg-white/10 w-10 backdrop-blur h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
+	const activeBtnStyle =
+		"bg-black w-10 h-10 rounded-lg p-2 flex items-center justify-center text-white text-shadow";
+
   return (
-    <div className="flex">
+    <div className="flex gap-1">
       <div
         onClick={undoPhotos}
-        className={`z-20 hover:opacity-100 cursor-pointer px-2 ${
-          keysPressed.control && keysPressed.lowerZ
+        className={`${btnStyle} ${
+          keysPressed.Control && keysPressed.z
             ? "opacity-100"
             : "opacity-60"
         }`}
@@ -30,8 +32,8 @@ export default function UndoButtons({
       </div>
       <div
         onClick={redoPhotos}
-        className={`z-20 hover:opacity-100 cursor-pointer px-2 ${
-          keysPressed.control && keysPressed.shift && keysPressed.upperZ
+        className={`${btnStyle} ${
+          keysPressed.Control && keysPressed.Shift && keysPressed.Z
             ? "opacity-100"
             : "opacity-60"
         }`}

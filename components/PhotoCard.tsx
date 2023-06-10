@@ -11,6 +11,7 @@ export default function PhotoCard({
 	handleDelete,
 	handleFullscreen,
 	photo,
+	inClipboard,
 }: {
 	addingTag: string | null;
 	setAddingTag: React.Dispatch<React.SetStateAction<string | null>>;
@@ -27,6 +28,7 @@ export default function PhotoCard({
 		photo: Photo
 	) => void;
 	photo: Photo;
+	inClipboard: boolean;
 }) {
 	const [isHovered, setIsHovered] = useState<boolean>(false);
 
@@ -48,7 +50,7 @@ export default function PhotoCard({
 				src={photo.fileUrl}
 				alt={photo.filename}
 				style={{ objectFit: "cover" }}
-				className=""
+				className={`${inClipboard && "opacity-50"}`}
 				fill
 			/>
 			<div className="z-20 flex flex-col justify-between w-full h-full">

@@ -4,10 +4,11 @@ import DownloadDrawer from "./DownloadDrawer";
 import SettingsDrawer from "./SettingsDrawer";
 import TagsDrawer from "./TagsDrawer";
 import UndoButtons from "./UndoButtons";
+import { PressableKeys } from "@/types/PressableKeys";
 
 type DrawerType = "tags" | "settings" | "download";
 
-export default function Drawers({undoPhotos, redoPhotos, keysPressed}: {undoPhotos: () => void, redoPhotos: () => void, keysPressed: {control: boolean, shift: boolean, lowerZ: boolean, upperZ: boolean}}) {
+export default function Drawers({undoPhotos, redoPhotos, keysPressed}: {undoPhotos: () => void, redoPhotos: () => void, keysPressed: PressableKeys}) {
 	const [openDrawer, setOpenDrawer] = useState<DrawerType | null>("tags");
 
 	return (
@@ -55,7 +56,7 @@ function DrawerButton({ type, active, setOpenDrawer }: { type: DrawerType; activ
     }
 
 	const btnStyle =
-		"bg-transparent w-10 h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
+		"bg-white/10 w-10 backdrop-blur h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
 	const activeBtnStyle =
 		"bg-black w-10 h-10 rounded-lg p-2 flex items-center justify-center text-white text-shadow";
 
