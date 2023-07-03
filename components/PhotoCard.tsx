@@ -58,7 +58,7 @@ export default function PhotoCard({
 				src={photo.localFileUrl || ""}
 				alt={photo.filename || ""}
 				style={{ objectFit: "cover" }}
-				className={`${inClipboard && "opacity-50"}`}
+				className={`${inClipboard ? "opacity-50" : ""}`}
 				fill
 			/>
 			<div className="z-20 flex flex-col justify-between w-full h-full">
