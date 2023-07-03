@@ -127,13 +127,13 @@ export default function NewGridSortingInterface({
 								return (
 									<Image
 										key={item.id}
-										src={item.localFileUrl}
+										src={item.localFileUrl || item.remoteFileUrl}
 										alt={item.filename}
 										width={100}
 										height={100}
 										style={{
 											position: "absolute",
-											opacity: 0.4,
+											opacity: selectedItems.length === 1 ? 0.5 : 1,
 											top: 0,
 											left: 0,
 											width: "100%",

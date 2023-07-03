@@ -25,9 +25,10 @@ export default function FullSizeImageOverlay({
           <div className="w-[70vw] h-[100vh] flex items-center ">
             <div className="w-full h-[60vh] relative bg-[#040404] border-2 border-white">
               <Image
-                src={photo.localFileUrl || ""}
+                src={photo.localFileUrl || photo.remoteFileUrl || ""}
                 alt={photo.filename || ""}
                 style={{ objectFit: "contain" }}
+                sizes="70vw"
                 fill
               />
               <div className="absolute top-0 right-0 bg-white flex items-center justify-center p-3 h-8 w-8 opacity-80 hover:opacity-100 transition-opacity cursor-pointer">

@@ -46,34 +46,6 @@ class Photo {
 		this.id = id;
 	}
 
-	getURL() {
-		if (this.remoteFileUrl) {
-			async () => {
-				const { data, error } = await supabase.storage
-					.from("Photos")
-					.createSignedUrl(this.remoteFileUrl as string, 15);
-				if (error) {
-					console.error(error);
-					return;
-				} else {
-					return data.signedUrl;
-				}
-			};
-		} else {
-			return this.localFileUrl;
-		}
-	}
-
-	duplicateWithNewId(): Photo {
-		return new Photo({
-			tag: this.tag,
-			filename: this.filename,
-			file: this.file,
-			localFileUrl: this.localFileUrl,
-			remoteFileUrl: this.remoteFileUrl,
-			id: uuid(),
-		});
-	}
 }
 
 export default Photo;
