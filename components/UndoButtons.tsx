@@ -22,7 +22,7 @@ export default function UndoButtons({
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (
 				(e.key === "z" && (e.metaKey || e.ctrlKey)) ||
-				(e.key === "Z" && e.metaKey)
+				(e.key === "Z" && (e.metaKey || e.ctrlKey))
 			) {
 				if (e.shiftKey) {
           redoPhotos();
