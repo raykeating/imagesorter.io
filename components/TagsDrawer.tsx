@@ -125,7 +125,6 @@ export default function TagsDrawer() {
 			const oldIndex = tags.findIndex((t) => t.id === active.id);
 			const newIndex = tags.findIndex((t) => t.id === over.id);
 			const newTagOrder = arrayMove(tags, oldIndex, newIndex);
-			console.log(oldIndex, newIndex, newTagOrder);
 			setTags(newTagOrder);
 		}
 		setDraggingTagID(null);

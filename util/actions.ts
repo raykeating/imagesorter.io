@@ -25,10 +25,7 @@ export default function getActions(
 			text: "Select All",
 			action: (e: Event) => {
 				e.stopPropagation();
-
 				setSelected(photos);
-
-				console.log(photos);
 			},
 		}
 	];
