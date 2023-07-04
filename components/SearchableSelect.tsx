@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { AppContext } from "@/pages/index";
+import { AppContext } from "@/util/appContext";
 import { Tag } from "@/types/Photo";
 import Photo from "@/types/Photo";
 import { v4 as uuid } from "uuid";
@@ -72,6 +72,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 				text: searchValue,
 				id: newTagId,
 				color: getNextTagColor(tags),
+				confidence: null,
 			};
 			return [...prevTags, newTag];
 		});
@@ -82,6 +83,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 			text: searchValue,
 			id: newTagId,
 			color: getNextTagColor(tags),
+			confidence: null,
 		});
 	};
 
@@ -97,7 +99,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 				<form onSubmit={handleAddNewTag}>
 					<input
 						type="text"
-						className="w-full py-1 px-3 rounded shadow bg-white/75 backdrop-blur text-end font-normal"
+						className="w-full py-1 px-3 rounded shadow bg-white/75 backdrop-blur text-end font-normal text-xs"
 						value={searchValue}
 						onChange={handleSearchChange}
 						onKeyDown={(e) => e.stopPropagation()}

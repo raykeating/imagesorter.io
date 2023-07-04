@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { AppContext } from "@/pages";
+import { AppContext } from "@/util/appContext";
 import { useContext } from "react";
 import Photo from "@/types/Photo";
-import DownloadOptions from "./DownloadOptions";
 
 export default function DownloadDrawer({
 	selectedPhotos,

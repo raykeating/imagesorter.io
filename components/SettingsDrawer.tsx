@@ -1,5 +1,5 @@
 import React from "react";
-import { AppContext } from "@/pages";
+import { AppContext } from "@/util/appContext";
 import { useContext } from "react";
 
 export default function SettingsDrawer() {

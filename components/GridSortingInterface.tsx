@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import Photo from "@/types/Photo";
-import { AppContext } from "@/pages";
+import { AppContext } from "@/util/appContext";
 import { useContext } from "react";
 
 import {
@@ -39,7 +39,7 @@ export default function GridSortingInterface({
 	clipboard,
 }: {
 	items: Photo[];
-	setItems: React.Dispatch<React.SetStateAction<any[]>>;
+	setItems: (items: Photo[]) => void;
 	setFullSizeImage: React.Dispatch<React.SetStateAction<any>>;
 	selectedItems: any[];
 	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;

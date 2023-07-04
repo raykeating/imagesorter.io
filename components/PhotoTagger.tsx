@@ -1,6 +1,6 @@
 import { Tag } from "@/types/Photo";
 import React, { useContext, useEffect, useState } from "react";
-import { AppContext } from "@/pages/index";
+import { AppContext } from "@/util/appContext";
 import SearchableSelect from "./SearchableSelect";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover } from "react-tiny-popover";

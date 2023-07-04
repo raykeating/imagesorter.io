@@ -12,10 +12,12 @@ export default function Drawers({
 	undoPhotos,
 	redoPhotos,
 	selectedItems,
+	handlePredict,
 }: {
 	undoPhotos: () => void;
 	redoPhotos: () => void;
 	selectedItems: Photo[];
+	handlePredict: () => void;
 }) {
 	const [openDrawer, setOpenDrawer] = useState<DrawerType | null>("tags");
 
@@ -47,7 +49,7 @@ export default function Drawers({
 					/>
 				</div>
 			</div>
-			<Drawer>{getDrawer(openDrawer, selectedItems)}</Drawer>
+			<Drawer>{getDrawer(openDrawer, selectedItems, handlePredict)}</Drawer>
 		</div>
 	);
 }
@@ -113,10 +115,10 @@ function DrawerButton({
 	);
 }
 
-function getDrawer(type: DrawerType | null, selectedItems: Photo[]) {
+function getDrawer(type: DrawerType | null, selectedItems: Photo[], handlePredict: () => void) {
 	switch (type) {
 		case "tags":
-			return <TagsDrawer />;
+			return <TagsDrawer handlePredict={handlePredict} />;
 		case "settings":
 			return <SettingsDrawer />;
 		case "download":

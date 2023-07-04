@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { AppContext } from "@/pages";
+import { AppContext } from "@/util/appContext";
 import { Tag } from "@/types/Photo";
 import { v4 as uuid } from "uuid";
 import { tagColors } from "@/types/Photo";
@@ -27,10 +27,16 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { CSS } from "@dnd-kit/utilities";
 import getNextTagColor from "@/util/getNextTagColor";
 
-export default function TagsDrawer() {
-	const { tags, setTags } = useContext(AppContext);
+export default function TagsDrawer({
+	handlePredict,
+}: {
+	handlePredict: () => void;
+}) {
+	const { photos, setPhotos, tags, setTags } = useContext(AppContext);
 	const [tagInput, setTagInput] = useState<string>("");
 	const [draggingTagID, setDraggingTagID] = useState<string | null>(null);
+	const [isLoadingPredictions, setIsLoadingPredictions] =
+		useState<boolean>(true);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -55,22 +61,57 @@ export default function TagsDrawer() {
 			id: uuid(),
 			text: tagInput,
 			color: getNextTagColor(tags),
+			confidence: null,
 		};
 		setTags([...tags, newTag]);
 		setTagInput("");
 		// getPredictions();
 	}
 
+	function handleSortImagesByTag(): void {
+		// sort images to match the order of the tags
+		const sortedPhotos = [...photos].sort((a, b) => {
+			const aTag = tags.find((tag) => tag.id === a.tag?.id);
+			const bTag = tags.find((tag) => tag.id === b.tag?.id);
+			if (!aTag || !bTag) return 0;
+			return tags.indexOf(aTag) - tags.indexOf(bTag);
+		});
+		setPhotos(sortedPhotos);
+	}
+
 	return (
 		<div className="flex flex-col gap-2 items-end w-full relative">
-			<div className="flex gap-2">
-				<button className="relative px-3 py-2 border-zinc-300 rounded border">Sort Images by Tag <i className="fa-solid fa-sort text-zinc-300 text-sm ml-1"></i>
-				{/* <span className="absolute top-[-10px] left-[-10px] text-xs font-bold bg-purple-100 p-1 rounded text-purple-900">PRO</span> */}
-				</button>
+			<div className="flex justify-between w-full">
+				<div className="flex gap-1">
+					<button
+						className="relative px-3 py-2 border-zinc-600 rounded border hover:border-zinc-300 transition-all active:border-zinc-300"
+						onClick={handlePredict}
+					>
+						{isLoadingPredictions ? (
+							<>
+								Predicting - 1 of {photos.length}
+								<i className="ml-2 fa-solid fa-circle-notch animate-spin"></i>
+							</>
+						) : (
+							<>
+								Predict from tags <i className="fa-solid fa-bolt"></i>
+							</>
+						)}
+					</button>
+					<div className="flex items-center justify-center"></div>
+					<button
+						className="relative px-3 py-2 border-zinc-600 rounded border hover:border-zinc-300 transition-all active:border-zinc-300"
+						onClick={handleSortImagesByTag}
+					>
+						Sort by tag order{" "}
+						<i className="fa-solid fa-sort text-zinc-300 text-sm ml-1"></i>
+					</button>
+				</div>
 				<form onSubmit={handleAddTag} className="relative flex items-center">
 					<input
 						type="text"
-						className="bg-zinc-900 px-3 py-2 rounded border border-zinc-500 text-white font-medium placeholder:text-zinc-400 w-[300px]"
+						className="bg-black px-3 py-2 rounded border focus:border-zinc-300  border-zinc-600 hover:border-zinc-400 text-white transition-colors placeholder:text-zinc-400 w-[300px]"
+						style={{ outline: "none" }}
 						placeholder="Add tag"
 						value={tagInput}
 						onChange={handleTagInput}
@@ -103,11 +144,7 @@ export default function TagsDrawer() {
 									exit={{ opacity: 0, x: 10 }}
 									transition={{ duration: 0.1 }}
 								>
-									<SortableTag
-										key={tag.id}
-										id={tag.id}
-										tag={tag}
-									/>
+									<SortableTag key={tag.id} id={tag.id} tag={tag} />
 								</motion.div>
 							))}
 						</AnimatePresence>

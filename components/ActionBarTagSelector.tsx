@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { AppContext } from "@/pages/index";
+import { AppContext } from "@/util/appContext";
 import { Tag } from "@/types/Photo";
 import Photo from "@/types/Photo";
 import { v4 as uuid } from "uuid";
