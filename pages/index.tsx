@@ -18,36 +18,40 @@ import { AppContext } from "@/util/appContext";
 import { pipeline, Pipeline } from "@xenova/transformers";
 import Alert from "@/components/Alert";
 import getNextTagColor from "@/util/getNextTagColor";
+import Compressor from "compressorjs";
 
 export default function Home() {
 	// **** Worker ****
 
 	// Create a reference to the worker object.
-	const worker = useRef<Worker | null>(null);
+	// const worker = useRef<Worker | null>(null);
 
 	// We use the `useEffect` hook to setup the worker as soon as the `App` component is mounted.
 	// https://huggingface.co/docs/transformers.js/tutorials/react
-	useEffect(() => {
-		if (!worker.current) {
-			// Create the worker if it does not yet exist.
-			worker.current = new Worker(new URL("./worker.ts", import.meta.url), {
-				type: "module",
-			});
-		}
+	// useEffect(() => {
+	// 	if (!worker.current) {
+	// 		// Create the worker if it does not yet exist.
+	// 		worker.current = new Worker(new URL("./worker.ts", import.meta.url), {
+	// 			type: "module",
+	// 		});
+	// 	}
 
-		// Create a callback function for messages from the worker thread.
-		const onMessageReceived = (e: MessageEvent<Photo[]>) => {
-			// TODO: Will fill in later
-		};
+	// 	// Create a callback function for messages from the worker thread.
+	// 	const onMessageReceived = (e: MessageEvent<any>) => {
+	// 		switch (e.data.type) {
+	// 			case "classifier-results":
 
-		// Attach the callback function as an event listener.
-		worker.current.addEventListener("message", onMessageReceived);
+	// 		}
+	// 	};
 
-		// Define a cleanup function for when the component is unmounted.
-		return () => {
-			worker.current?.removeEventListener("message", onMessageReceived);
-		};
-	});
+	// 	// Attach the callback function as an event listener.
+	// 	worker.current.addEventListener("message", onMessageReceived);
+
+	// 	// Define a cleanup function for when the component is unmounted.
+	// 	return () => {
+	// 		worker.current?.removeEventListener("message", onMessageReceived);
+	// 	};
+	// });
 
 	// **** App State ****
 
@@ -182,58 +186,60 @@ export default function Home() {
 	// 	handlePredict();
 	// }, [photos, tags]);
 
-	const handlePredict = () => {
-		// const results = await classifier(
-		// 	photos.map((photo: Photo) => photo.localFileUrl),
-		// 	tags.map((tag: Tag) => tag.text)
-		// );
+	// const handlePredict = () => {
+	// 	// const results = await classifier(
+	// 	// 	photos.map((photo: Photo) => photo.localFileUrl),
+	// 	// 	tags.map((tag: Tag) => tag.text)
+	// 	// );
 
-		const callHandlePredict = async () => {
-			if (worker.current && photos.length > 0 && tags.length > 0) {
-				const results = worker.current.postMessage({
-					photos: photos.map((photo: Photo) => photo.localFileUrl),
-					tags: tags.map((tag: Tag) => tag.text),
-				});
+	// 	const callHandlePredict = async () => {
+	// 		if (worker.current && photos.length > 0 && tags.length > 0) {
+	// 			const results = worker.current.postMessage({
+	// 				photos: photos.map((photo: Photo) => photo.localFileUrl),
+	// 				tags: tags.map((tag: Tag) => tag.text),
+	// 			});
 
-				console.log(results);
+	// 			// console.log(worker.current);
 
-				// const newPhotos = photos.map((photo: Photo, index: number) => {
-				// 	const prediction = results[index].reduce(
-				// 		(prev: any, current: any) => {
-				// 			return prev.score > current.score ? prev : current;
-				// 		}
-				// 	);
+	// 			// console.log(results);
 
-				// 	return {
-				// 		...photo,
-				// 		tag: tags.find((tag: Tag) => tag.text === prediction.label) || null,
-				// 	};
-				// });
+	// 			// const newPhotos = photos.map((photo: Photo, index: number) => {
+	// 			// 	const prediction = results[index].reduce(
+	// 			// 		(prev: any, current: any) => {
+	// 			// 			return prev.score > current.score ? prev : current;
+	// 			// 		}
+	// 			// 	);
 
-				// setPhotos(newPhotos);
-			} else if (!worker.current) {
-				setAlert({
-					isOpen: true,
-					title: "Classifier not loaded",
-					text: "Try again in a moment, the classifier is still loading.",
-				});
-			} else if (photos.length === 0) {
-				setAlert({
-					isOpen: true,
-					title: "No photos",
-					text: "Upload some photos to start applying tags to them.",
-				});
-			} else if (tags.length === 0) {
-				setAlert({
-					isOpen: true,
-					title: "No tags",
-					text: "Upload some tags to start applying them to photos.",
-				});
-			}
-		};
+	// 			// 	return {
+	// 			// 		...photo,
+	// 			// 		tag: tags.find((tag: Tag) => tag.text === prediction.label) || null,
+	// 			// 	};
+	// 			// });
 
-		callHandlePredict();
-	};
+	// 			// setPhotos(newPhotos);
+	// 		} else if (!worker.current) {
+	// 			setAlert({
+	// 				isOpen: true,
+	// 				title: "Classifier not loaded",
+	// 				text: "Try again in a moment, the classifier is still loading.",
+	// 			});
+	// 		} else if (photos.length === 0) {
+	// 			setAlert({
+	// 				isOpen: true,
+	// 				title: "No photos",
+	// 				text: "Upload some photos to start applying tags to them.",
+	// 			});
+	// 		} else if (tags.length === 0) {
+	// 			setAlert({
+	// 				isOpen: true,
+	// 				title: "No tags",
+	// 				text: "Upload some tags to start applying them to photos.",
+	// 			});
+	// 		}
+	// 	};
+
+	// 	callHandlePredict();
+	// };
 
 	return (
 		<AppContext.Provider
@@ -301,7 +307,7 @@ export default function Home() {
 					undoPhotos={undoPhotos}
 					redoPhotos={redoPhotos}
 					selectedItems={selectedItems}
-					handlePredict={handlePredict}
+					handlePredict={() => {}}
 				/>
 
 				<ConfirmationDialogue
@@ -380,19 +386,31 @@ export default function Home() {
 		const files = e.target.files;
 		let newPhotos: Photo[] = [];
 		if (files) {
+			setIsUploading(true);
 			for (let i = 0; i < files.length; i++) {
-				newPhotos.push(
-					new Photo({
-						tag: null,
-						filename: files[i].name,
-						file: files[i],
-						localFileUrl: URL.createObjectURL(files[i]),
-						remoteFileUrl: null,
-						id: uuid(),
-					})
-				);
+				console.log("compressing file");
+				new Compressor(files[i], {
+					quality: 0.3,
+					success: (compressedFile) => {
+						console.log("compressed file");
+						newPhotos.push(
+							new Photo({
+								tag: null,
+								filename: compressedFile.name,
+								file: compressedFile,
+								localFileUrl: URL.createObjectURL(compressedFile), //TODO - add another field for the original file
+								remoteFileUrl: null,
+								id: uuid(),
+							})
+						);
+						if (i === files.length - 1) {
+							console.log("done compressing files");
+							setPhotos([...photos, ...newPhotos]);
+							setIsUploading(false);
+						}
+					},
+				});
 			}
-			setPhotos([...photos, ...newPhotos]);
 		}
 	}
 }

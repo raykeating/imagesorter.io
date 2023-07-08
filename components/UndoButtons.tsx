@@ -11,7 +11,7 @@ export default function UndoButtons({
 }: Props) {
 
   const btnStyle =
-		"bg-white/10 w-10 backdrop-blur h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
+		"bg-white/10 w-10  h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
 	const activeBtnStyle =
 		"bg-black w-10 h-10 rounded-lg p-2 flex items-center justify-center text-white text-shadow";
   const [undoHighlight, setUndoHighlight] = React.useState<boolean>(false);

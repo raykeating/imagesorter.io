@@ -99,7 +99,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 				<form onSubmit={handleAddNewTag}>
 					<input
 						type="text"
-						className="w-full py-1 px-3 rounded shadow bg-white/75 backdrop-blur text-end font-normal text-xs"
+						className="w-full py-1 px-3 rounded shadow bg-white/75  text-end font-normal text-xs"
 						value={searchValue}
 						onChange={handleSearchChange}
 						onKeyDown={(e) => e.stopPropagation()}
@@ -112,7 +112,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 				
 			</div>
 			{isOpen && (
-				<div className="bg-white/75 backdrop-blur shadow-sm rounded overflow-y-scroll max-h-[115px] minimal-scrollbar">
+				<div className="bg-white/75  shadow-sm rounded overflow-y-scroll max-h-[115px] minimal-scrollbar">
 					{filteredOptions.map((option) => (
 						<button
 							key={option.id}

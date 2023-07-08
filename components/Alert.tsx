@@ -29,7 +29,7 @@ export default function Alert({ alert, setAlert }: Props) {
 						})
 					}
 				>
-					<div className="p-8 bg-white/75 backdrop-blur rounded items-center justify-center flex flex-col gap-3 max-w-[700px] relative">
+					<div className="p-8 bg-white/75  rounded items-center justify-center flex flex-col gap-3 max-w-[700px] relative">
 						<h3 className="font-bold text-lg">{alert.title}</h3>
 						<p>{alert.text}</p>
 						<div className="flex gap-1 mt-1">

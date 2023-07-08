@@ -85,7 +85,7 @@ export default function GridSortingInterface({
 			modifiers={[restrictToWindowEdges]}
 		>
 			<SortableContext items={items} strategy={rectSortingStrategy}>
-				<div className={`grid grid-cols-${zoomLevel} gap-2 pb-[150px]`}>
+				<div className={`grid grid-cols-${zoomLevel} gap-2 pb-[180px]`}>
 					{items.map((item, index) => (
 						<SortablePhoto
 							key={item.id}
@@ -109,13 +109,13 @@ export default function GridSortingInterface({
 				</div>
 			</SortableContext>
 
-			<DragOverlay adjustScale={true}>
+			<DragOverlay>
 				<div className="relative scale-75">
-					{selectedItems.length > 1 ? (
+					{selectedItems.length > 1 && (
 						<span className="z-50 bg-red-600 text-white rounded-full absolute -left-1 -top-1 w-7 h-7 flex items-center justify-center">
 							{selectedItems.length}
 						</span>
-					) : null}
+					)}
 					{activeId && items.some((item) => item.id === activeId) ? (
 						<div className="relative h-[200px] w-[200px]">
 							{selectedItems

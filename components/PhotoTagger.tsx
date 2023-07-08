@@ -128,7 +128,7 @@ export default function PhotoTagger({
 											? handleClearButtonClick
 											: handleAddTag
 									}
-									className="bg-white/40 hover:bg-white/75  z-20 backdrop-blur h-7 w-7 rounded-sm shadow shadow-black/25 hover:shadow-black/50 transition-all flex items-center justify-center aspect-square relative"
+									className="bg-white/40 hover:bg-white/75  z-20  h-7 w-7 rounded-sm shadow shadow-black/25 hover:shadow-black/50 transition-all flex items-center justify-center aspect-square relative"
 									onMouseEnter={startTooltipTimer}
 									onMouseLeave={clearTooltipTimer}
 								>

@@ -60,6 +60,7 @@ export default function PhotoCard({
 				style={{ objectFit: "cover" }}
 				className={`${inClipboard ? "opacity-50" : ""}`}
 				fill
+				quality={10}
 			/>
 			<div className="z-20 flex flex-col justify-between w-full h-full">
 				<PhotoTagger
@@ -81,13 +82,13 @@ export default function PhotoCard({
 						>
 							<div
 								onClick={(e) => handleFullscreen(e, photo)}
-								className="shadow shadow-black/25 rounded-sm h-6 w-6 bg-white/40 backdrop-blur hover:bg-white/75 transition-all flex items-center justify-center"
+								className="shadow shadow-black/25 rounded-sm h-6 w-6 bg-white/40  hover:bg-white/75 transition-all flex items-center justify-center"
 							>
 								<i className="fa-solid fa-expand text-[16px] text-black/80 hover:text-black"></i>
 							</div>
 							<div
 								onClick={(e) => handleDelete(e, photo)}
-								className="shadow shadow-black/25 hover:shadow-black/40 rounded-sm h-6 w-6 bg-white/40 hover:bg-white/75 backdrop-blur transition-all flex items-center justify-center"
+								className="shadow shadow-black/25 hover:shadow-black/40 rounded-sm h-6 w-6 bg-white/40 hover:bg-white/75  transition-all flex items-center justify-center"
 							>
 								<i className="fa-solid fa-trash text-[12px] text-black/80 hover:text-black"></i>
 							</div>

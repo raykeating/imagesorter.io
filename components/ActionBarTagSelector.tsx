@@ -11,6 +11,7 @@ type Props = {
 };
 
 export default function ActionBarTagSelector({
+	photos,
 	selectedPhotos,
 	setAddingTag,
 }: Props) {
@@ -99,7 +100,7 @@ export default function ActionBarTagSelector({
 				<form onSubmit={handleAddNewTag}>
 					<input
 						type="text"
-						className="w-full py-1 px-3 rounded shadow bg-white/75 backdrop-blur text-end font-normal"
+						className="w-full py-1 px-3 rounded shadow bg-white/75  text-end font-normal"
 						value={searchValue}
 						onChange={handleSearchChange}
 						onKeyDown={(e) => e.stopPropagation()}
@@ -111,7 +112,7 @@ export default function ActionBarTagSelector({
 				</form>
 			</div>
 			{isOpen && (
-				<div className="bg-white/75 backdrop-blur shadow-sm rounded overflow-y-scroll max-h-[115px] minimal-scrollbar">
+				<div className="bg-white/75  shadow-sm rounded overflow-y-scroll max-h-[115px] minimal-scrollbar">
 					{filteredOptions.map((option) => (
 						<button
 							key={option.id}

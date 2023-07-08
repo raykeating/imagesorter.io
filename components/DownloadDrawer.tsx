@@ -8,7 +8,7 @@ export default function DownloadDrawer({
 }: {
 	selectedPhotos: Photo[];
 }) {
-	const { photos } = useContext(AppContext);
+	// const { photos } = useContext(AppContext);
 
 	const [isUsingSubfolders, setIsUsingSubfolders] = useState<boolean>(true);
 
