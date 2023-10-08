@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { AppContext } from "@/pages/index";
+import { AppContext } from "@/util/appContext";
 import { Tag } from "@/types/Photo";
 import Photo from "@/types/Photo";
 import { v4 as uuid } from "uuid";
@@ -10,9 +10,10 @@ type Props = {
 	searchValue: string;
 	setSearchValue: React.Dispatch<React.SetStateAction<string>>;
 	setAddingTag: React.Dispatch<React.SetStateAction<string | null>>;
+	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 };
 
-export default function SearchableSelect({ photoId, searchValue, setSearchValue, setAddingTag }: Props) {
+export default function SearchableSelect({ photoId, searchValue, setSearchValue, setAddingTag, setSelectedItems }: Props) {
 	const { tags, setTags, setPhotos } = useContext(AppContext);
 
 	const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -48,6 +49,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 			});
 			return updatedPhotos;
 		});
+		setSelectedItems([]);
 	};
 
 	const handleSelectOption = (
@@ -72,6 +74,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 				text: searchValue,
 				id: newTagId,
 				color: getNextTagColor(tags),
+				confidence: null,
 			};
 			return [...prevTags, newTag];
 		});
@@ -82,6 +85,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 			text: searchValue,
 			id: newTagId,
 			color: getNextTagColor(tags),
+			confidence: null,
 		});
 	};
 
@@ -97,7 +101,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 				<form onSubmit={handleAddNewTag}>
 					<input
 						type="text"
-						className="w-full py-1 px-3 rounded shadow bg-white/75 backdrop-blur text-end font-normal"
+						className="w-full py-1 px-3 rounded shadow bg-white/75  text-end font-normal text-xs"
 						value={searchValue}
 						onChange={handleSearchChange}
 						onKeyDown={(e) => e.stopPropagation()}
@@ -110,7 +114,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 				
 			</div>
 			{isOpen && (
-				<div className="bg-white/75 backdrop-blur shadow-sm rounded overflow-y-scroll max-h-[115px] minimal-scrollbar">
+				<div className="bg-white/75  shadow-sm rounded overflow-y-scroll max-h-[115px] minimal-scrollbar">
 					{filteredOptions.map((option) => (
 						<button
 							key={option.id}

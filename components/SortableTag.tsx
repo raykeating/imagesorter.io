@@ -1,12 +1,17 @@
 import React, { useContext } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Tag as TagType } from "types/Photo";
-import { AppContext } from "@/pages";
+import Photo, { Tag as TagType } from "types/Photo";
+import { AppContext } from "@/util/appContext";
 
 export function SortableTag({ id, tag }: { id: string; tag: TagType }) {
-	const { setTags, setPhotos, photos, setConfirmationDialog } =
-		useContext(AppContext);
+	const {
+		setTags,
+		setPhotos,
+		photos,
+		setConfirmationDialog,
+		setAddingTagWithId,
+	} = useContext(AppContext);
 
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({ id: id });
@@ -30,10 +35,10 @@ export function SortableTag({ id, tag }: { id: string; tag: TagType }) {
 					}. Are you sure you want to remove it?`,
 					onConfirm: () => {
 						// Remove tag from global tags
-						setTags((tags) => tags.filter((t) => t.id !== tag.id));
+						setTags((tags: TagType[]) => tags.filter((t) => t.id !== tag.id));
 						// Remove tag from photos
-						setPhotos((photos) =>
-							photos.map((photo) => {
+						setPhotos(
+							photos.map((photo: Photo) => {
 								if (photo.tag?.id === tag.id) {
 									return { ...photo, tag: null };
 								} else {
@@ -41,26 +46,36 @@ export function SortableTag({ id, tag }: { id: string; tag: TagType }) {
 								}
 							})
 						);
-					}
+						setAddingTagWithId(null);
+					},
 				};
 			});
-			
 		} else {
 			setTags((tags) => tags.filter((t) => t.id !== tag.id));
 		}
 	};
 
 	return (
-		<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-			<li className="rounded p-1 pl-3" style={{ backgroundColor: tag.color }}>
-				<span>{tag.text}</span>
-				<button
-					className=" py-1 px-2 opacity-90 hover:opacity-100"
-					onClick={handleRemoveTag}
-				>
-					&times;
-				</button>
-			</li>
-		</div>
+		<li
+			ref={setNodeRef}
+			style={{
+				...style,
+			}}
+			{...attributes}
+			{...listeners}
+			className="rounded p-1 pl-3 border border-zinc-600 hover:border-gray-300 hover:border-l-gray-300 flex justify-between items-center bg-zinc-900"
+		>
+			<div
+				className="h-3 w-3 rounded-full mr-2"
+				style={{ backgroundColor: tag.color }}
+			></div>
+			<span>{tag.text}</span>
+			<button
+				className=" py-1 px-2 opacity-90 hover:opacity-100"
+				onClick={handleRemoveTag}
+			>
+				&times;
+			</button>
+		</li>
 	);
 }

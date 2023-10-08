@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import PhotoTagger from "./PhotoTagger";
 import { forwardRef } from "react";
 
-export default function PhotoCard({
+export default React.memo(function PhotoCard({
 	sortableRef,
 	sortableStyle,
 	addingTag,
@@ -13,6 +13,7 @@ export default function PhotoCard({
 	handleItemClick,
 	handleDelete,
 	handleFullscreen,
+	setSelectedItems,
 	photo,
 	inClipboard,
 	...props
@@ -33,6 +34,7 @@ export default function PhotoCard({
 		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
 		photo: Photo
 	) => void;
+	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	photo: Photo;
 	inClipboard: boolean;
 }) {
@@ -68,6 +70,7 @@ export default function PhotoCard({
 					addingTag={addingTag}
 					setAddingTag={setAddingTag}
 					isHovered={isHovered}
+					setSelectedItems={setSelectedItems}
 				/>
 
 				<AnimatePresence>
@@ -81,13 +84,13 @@ export default function PhotoCard({
 						>
 							<div
 								onClick={(e) => handleFullscreen(e, photo)}
-								className="shadow shadow-black/25 rounded-sm h-6 w-6 bg-white/40 backdrop-blur hover:bg-white/75 transition-all flex items-center justify-center"
+								className="shadow shadow-black/25 rounded-sm h-6 w-6 bg-white/40  hover:bg-white/75 transition-all flex items-center justify-center"
 							>
 								<i className="fa-solid fa-expand text-[16px] text-black/80 hover:text-black"></i>
 							</div>
 							<div
 								onClick={(e) => handleDelete(e, photo)}
-								className="shadow shadow-black/25 hover:shadow-black/40 rounded-sm h-6 w-6 bg-white/40 hover:bg-white/75 backdrop-blur transition-all flex items-center justify-center"
+								className="shadow shadow-black/25 hover:shadow-black/40 rounded-sm h-6 w-6 bg-white/40 hover:bg-white/75  transition-all flex items-center justify-center"
 							>
 								<i className="fa-solid fa-trash text-[12px] text-black/80 hover:text-black"></i>
 							</div>
@@ -97,4 +100,4 @@ export default function PhotoCard({
 			</div>
 		</div>
 	);
-}
+});

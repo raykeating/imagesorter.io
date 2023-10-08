@@ -1,113 +1,85 @@
-import React, { useState, useEffect, createContext } from "react";
+// Libraries
+import React, { useState, useEffect } from "react";
+import { v4 as uuid } from "uuid";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import Image from "next/dist/client/image";
+
+// Components
+import GridSortingInterface from "@/components/GridSortingInterface";
+import FullSizeImageOverlay from "@/components/FullSizeImageOverlay";
+import ProgressIndicator from "@/components/ProgressIndicator";
+import TopActionBar from "@/components/TopActionBar";
+import Drawers from "@/components/Drawers";
+import Alert from "@/components/Alert";
+import ConfirmationDialogue from "@/components/ConfirmationDialogue";
+import ZoomButtons from "@/components/ZoomButtons";
+import AppInfoModal from "@/components/AppInfoModal";
+
+// Custom Hooks and Utilities
+import useClassifier from "@/util/hooks/useClassifier";
+import useUndoableState from "@/util/hooks/useUndoableState";
+import useKeyboardActions from "@/util/hooks/useKeyboardActions";
+import useKeypressListener from "@/util/hooks/useKeypressListener";
+import getActions from "@/util/actions";
+import { AppContext } from "@/util/appContext";
+import { getInitialPhotos, initialTags } from "@/util/initialData";
+
+// Types
 import { Tag } from "@/types/Photo";
 import Photo from "@/types/Photo";
 import { Clipboard } from "@/types/Clipboard";
-import { v4 as uuid } from "uuid";
-import GridSortingInterface from "@/components/GridSortingInterface";
-import FullSizeImageOverlay from "@/components/FullSizeImageOverlay";
-import useUndoableState from "@/util/hooks/useUndoableState";
-import UndoButtons from "@/components/UndoButtons";
-import UploadIndicator from "@/components/UploadIndicator";
-import getActions from "@/util/actions";
-import TopActionBar from "@/components/TopActionBar";
-import Drawers from "@/components/Drawers";
-import Toasts from "@/components/Toasts";
-import { syncTags, syncPhotos } from "@/util/supabase/syncAppState";
-
-export const AppContext = createContext<{
-	photos: Photo[];
-	setPhotos: React.Dispatch<React.SetStateAction<Photo[]>>;
-	tags: Tag[];
-	setTags: React.Dispatch<React.SetStateAction<Tag[]>>;
-	toasts: string[];
-	setToasts: React.Dispatch<React.SetStateAction<string[]>>;
-	confirmationDialog: {
-		isOpen: boolean;
-		title: string;
-		text: string;
-		onConfirm: () => void;
-		onCancel: () => void;
-	};
-	setConfirmationDialog: React.Dispatch<
-		React.SetStateAction<{
-			isOpen: boolean;
-			title: string;
-			text: string;
-			onConfirm: () => void;
-			onCancel: () => void;
-		}>
-	>;
-	zoomLevel: number;
-	setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
-	setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
-}>({
-	photos: [],
-	setPhotos: () => {},
-	tags: [],
-	setTags: () => {},
-	toasts: [],
-	setToasts: () => {},
-	confirmationDialog: {
-		isOpen: false,
-		title: "",
-		text: "",
-		onConfirm: () => {},
-		onCancel: () => {},
-	},
-	setConfirmationDialog: () => {},
-	zoomLevel: 5,
-	setZoomLevel: () => {},
-	setIsUploading: () => {},
-});
+import { PressableKeys } from "@/types/PressableKeys";
+import { ClassifierOutput } from "@/types/Classifier";
 
 export default function Home() {
-	const [tags, setTags] = useState<Tag[]>([]);
-	const [addingTagWithId, setAddingTagWithId] = useState<string | null>(null); // tag id
+	// **** App State ****
 
 	// useUndoableState is a custom hook that returns an array with the state,
 	// a function to set the state, a function to undo the state, and a function
 	// to redo the state.  It also stores the state history in local storage.
-	const [photos, setPhotos, undoPhotos, redoPhotos] = useUndoableState([]);
+	const [photos, setPhotos, undoPhotos, redoPhotos] = useUndoableState<Photo[]>(
+		[]
+	);
 
-	// // store the state in local storage
-	// useEffect(() => {
-	// 	// if (photos.length > 0) {
-	// 	syncPhotos(photos, setIsUploading);
-	// 	// }
-	// }, [photos]);
+	// tags is an array of Tag objects that are currently in the app state.
+	const [tags, setTags] = useState<Tag[]>(initialTags);
 
-	// useEffect(() => {
-	// 	// if (tags.length > 0) {
-	// 	syncTags(tags, setIsUploading);
-	// 	// }
-	// }, [tags]);
+	// addingTagWithId is a string that is the id of the photo that is currently
+	// being tagged.  It is used to display the tag selector in the photo card
+	const [addingTagWithId, setAddingTagWithId] = useState<string | null>(null); // tag id
 
+	// fullSizeImage stores the photo that is currently being displayed in the
+	// full size image overlay.  When it is null, the overlay is not displayed.
 	const [fullSizeImage, setFullSizeImage] = useState<Photo | null>(null);
 
+	// clipboard stores the photos that have been copied or cut.  It is used to
+	// paste photos after they have been copied or cut.
 	const [clipboard, setClipboard] = useState<Clipboard>({
 		lastAction: null,
 		photos: [],
 	});
 
+	// selectedItems is an array of Photo objects that are currently selected.
 	const [selectedItems, setSelectedItems] = useState<Photo[]>([]);
 
+	// isTopBarTagSelectorOpen is a boolean that is true when the tag selector
+	// in the top action bar is open.  It is used to tag photos in bulk.
 	const [isTopBarTagSelectorOpen, setIsTopBarTagSelectorOpen] =
 		useState<boolean>(false);
+
+	// currently, toasts are hidden behind the drawers, so they are not visible
+	const [toasts, setToasts] = useState<string[]>([]);
 
 	const [actions, setActions] = useState(
 		getActions(photos, setPhotos, selectedItems, setSelectedItems)
 	);
 
-	const [keysPressed, setKeysPressed] = useState<{
-		control: boolean;
-		meta: boolean;
-		lowerZ: boolean;
-		upperZ: boolean;
-		shift: boolean;
-		c: boolean;
-		x: boolean;
-		v: boolean;
-	}>({
+	// zoomLevel is a number that represents the zoom level of the grid (# of columns)
+	const [zoomLevel, setZoomLevel] = useState<number>(5);
+
+	// keysPressed is an object that keeps track of which keys are currently pressed
+	const [keysPressed, setKeysPressed] = useState<PressableKeys>({
 		control: false,
 		meta: false,
 		lowerZ: false,
@@ -116,209 +88,78 @@ export default function Home() {
 		c: false,
 		x: false,
 		v: false,
+		delete: false,
 	});
 
-	const [zoomLevel, setZoomLevel] = useState<number>(5);
-
-	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = e.target.files;
-		let newPhotos: Photo[] = [];
-		if (files) {
-			for (let i = 0; i < files.length; i++) {
-				newPhotos.push(
-					new Photo({
-						tag: null,
-						filename: files[i].name,
-						file: files[i],
-						localFileUrl: URL.createObjectURL(files[i]),
-						remoteFileUrl: null,
-						id: uuid(),
-					})
-				);
-			}
-			setPhotos([...photos, ...newPhotos]);
-
-			// if (tags.length > 0) {
-			// 	getPredictionsFromTags(photos, setPhotos, tags);
-			// }
-		}
-	};
-
-	// listen for changes to photos or selectedItems and update actions
-	useEffect(() => {
-		setActions(getActions(photos, setPhotos, selectedItems, setSelectedItems));
-	}, [photos, selectedItems]);
-
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Control") {
-				setKeysPressed((kp) => {
-					return { ...kp, control: true };
-				});
-			} else if (e.key === "Meta") {
-				setKeysPressed((kp) => {
-					return { ...kp, meta: true };
-				});
-			} else if (e.key === "Shift") {
-				setKeysPressed((kp) => {
-					return { ...kp, shift: true };
-				});
-			} else if (e.key === "z") {
-				setKeysPressed((kp) => {
-					return { ...kp, lowerZ: true };
-				});
-			} else if (e.key === "Z") {
-				setKeysPressed((kp) => {
-					return { ...kp, upperZ: true };
-				});
-			} else if (e.key === "c") {
-				setKeysPressed((kp) => {
-					return { ...kp, c: true };
-				});
-			} else if (e.key === "x") {
-				setKeysPressed((kp) => {
-					return { ...kp, x: true };
-				});
-			} else if (e.key === "v") {
-				setKeysPressed((kp) => {
-					return { ...kp, v: true };
-				});
-			}
-		};
-
-		const handleKeyUp = (e: KeyboardEvent) => {
-			if (e.key === "Control") {
-				setKeysPressed((kp) => {
-					return { ...kp, control: false };
-				});
-			} else if (e.key === "Meta") {
-				setKeysPressed((kp) => {
-					return { ...kp, meta: false, lowerZ: false };
-				});
-			} else if (e.key === "Shift") {
-				setKeysPressed((kp) => {
-					return { ...kp, shift: false };
-				});
-			} else if (e.key === "z") {
-				setKeysPressed((kp) => {
-					return { ...kp, lowerZ: false };
-				});
-			} else if (e.key === "Z") {
-				setKeysPressed((kp) => {
-					return { ...kp, upperZ: false };
-				});
-			} else if (e.key === "c") {
-				setKeysPressed((kp) => {
-					return { ...kp, c: false };
-				});
-			} else if (e.key === "x") {
-				setKeysPressed((kp) => {
-					return { ...kp, x: false };
-				});
-			} else if (e.key === "v") {
-				setKeysPressed((kp) => {
-					return { ...kp, v: false };
-				});
-			}
-		};
-
-		window.addEventListener("keydown", handleKeyDown);
-		window.addEventListener("keyup", handleKeyUp);
-		return () => {
-			window.removeEventListener("keydown", handleKeyDown);
-			window.removeEventListener("keyup", handleKeyUp);
-		};
-	}, []);
-
-	// copy with ctrl+c
-	useEffect(() => {
-		if (keysPressed.control && keysPressed.c) {
-			setClipboard({
-				lastAction: "copy",
-				photos: selectedItems,
-			});
-		}
-	}, [keysPressed]);
-
-	// cut with ctrl+x
-	useEffect(() => {
-		if (keysPressed.control && keysPressed.x) {
-			setClipboard({
-				lastAction: "cut",
-				photos: selectedItems,
-			});
-		}
-	}, [keysPressed]);
-
-	// paste with ctrl+v
-	useEffect(() => {
-		if (keysPressed.control && keysPressed.v) {
-			let oldPhotos: Photo[] = [...photos];
-
-			if (clipboard.lastAction === "cut") {
-				// remove cut items
-				oldPhotos = oldPhotos.filter(
-					(item) => !clipboard.photos.map((item) => item.id).includes(item.id)
-				);
-			}
-
-			setClipboard({
-				...clipboard,
-				lastAction: "paste",
-			});
-
-			const duplicateItems = clipboard.photos.map(
-				(item) =>
-					// duplicate item with new id
-					new Photo({
-						...item,
-						id: uuid(),
-					})
-			);
-			if (selectedItems.length === 0) {
-				setPhotos([...oldPhotos, ...duplicateItems]);
-			} else {
-				const selectedItemsIds = selectedItems.map((item) => item.id);
-				const selectedItemsIndex = oldPhotos.findIndex((item) =>
-					selectedItemsIds.includes(item.id)
-				);
-				const newPhotos = [
-					...oldPhotos.slice(0, selectedItemsIndex + 1),
-					...duplicateItems,
-					...oldPhotos.slice(selectedItemsIndex + 1),
-				];
-				setPhotos(newPhotos);
-			}
-		}
-	}, [keysPressed]);
-
-	// currently, toasts are hidden behind the drawers, so they are not visible
-	const [toasts, setToasts] = useState<string[]>([]);
-
-	useEffect(() => {
-		const interval = setInterval(() => {
-			if (toasts.length > 0) {
-				setToasts(toasts.slice(1));
-			}
-		}, 3000);
-		return () => clearInterval(interval);
-	}, [toasts]);
-
+	// confirmationDialog is used to display a confirmation dialog.
+	// use onConfirm and onCancel to set the functions that are called when the
+	// user confirms or cancels the dialog.
 	const [confirmationDialog, setConfirmationDialog] = useState<{
 		isOpen: boolean;
 		title: string;
 		text: string;
 		onConfirm: () => void;
 		onCancel: () => void;
+		confirmButtonText?: string;
+		cancelButtonText?: string;
 	}>({
 		isOpen: false,
 		title: "",
 		text: "",
 		onConfirm: () => {},
 		onCancel: () => {},
+		confirmButtonText: "Confirm",
+		cancelButtonText: "Cancel",
 	});
 
-	const [isUploading, setIsUploading] = useState<boolean>(false);
+	const [alert, setAlert] = useState<{
+		isOpen: boolean;
+		title: string;
+		text: string;
+	}>({
+		isOpen: false,
+		title: "",
+		text: "",
+	});
+
+	const [showInfoModal, setShowInfoModal] = useState<boolean>(false);
+
+	// **** Effects ****
+
+	// load initial photos
+	useEffect(() => {
+		getInitialPhotos().then((initialPhotos) => {
+			setPhotos(initialPhotos);
+		});
+	}, []);
+
+	// listen for changes to photos or selectedItems and update actions
+	useEffect(() => {
+		setActions(getActions(photos, setPhotos, selectedItems, setSelectedItems));
+	}, [photos, selectedItems]);
+
+	useKeypressListener(setKeysPressed);
+
+	useKeyboardActions(
+		keysPressed,
+		photos,
+		setPhotos,
+		clipboard,
+		setClipboard,
+		selectedItems,
+		setSelectedItems
+	);
+
+	// **** Classifier ****
+	const classifier = useClassifier();
+	const [isClassifying, setIsClassifying] = useState<boolean>(false);
+	const [classifierProgress, setClassifierProgress] = useState<{
+		current: number;
+		total: number;
+	}>({
+		current: 0,
+		total: 0,
+	});
 
 	return (
 		<AppContext.Provider
@@ -333,7 +174,7 @@ export default function Home() {
 				setConfirmationDialog,
 				zoomLevel,
 				setZoomLevel,
-				setIsUploading,
+				setAddingTagWithId,
 			}}
 		>
 			<div
@@ -343,6 +184,10 @@ export default function Home() {
 					setIsTopBarTagSelectorOpen(false);
 				}}
 			>
+				{/********************************
+				 **** Main Grid and Action Bar ****
+				 ********************************/}
+
 				<div className="flex flex-col pt-8 max-w-[1000px] mx-auto gap-2 p-4">
 					<TopActionBar
 						uploadedPhotoCount={photos.length}
@@ -368,7 +213,28 @@ export default function Home() {
 					/>
 				</div>
 
-				{/* Absolute elements and overlays */}
+				{/**************************************
+				 **** Absolute elements and overlays ****
+				 **************************************/}
+
+				<div className="fixed top-4 left-4 flex gap-1">
+					<div className="px-2 py-1 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-400 opacity-80">
+						<Image
+							src="/ImageSorterLogo.png"
+							alt="Image Sorter Logo"
+							width={70}
+							height={40}
+							quality={100}
+						/>
+					</div>
+					<button
+						onClick={() => setShowInfoModal(true)}
+						className="px-3 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-black transition-colors"
+					>
+						<i className="fa-solid fa-info-circle"></i>
+					</button>
+				</div>
+				<ZoomButtons zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
 
 				<FullSizeImageOverlay
 					photo={fullSizeImage}
@@ -379,47 +245,32 @@ export default function Home() {
 					undoPhotos={undoPhotos}
 					redoPhotos={redoPhotos}
 					selectedItems={selectedItems}
+					handlePredict={handlePredict}
+					handleDownloadPhotos={handleDownloadPhotos}
 				/>
-				<Toasts toasts={toasts} />
-				{confirmationDialog.isOpen && (
-					<div className="fixed top-0 left-0 w-screen h-screen bg-black/80 flex items-center justify-center z-50">
-						<div className="p-8 bg-white/75 backdrop-blur rounded items-center justify-center flex flex-col gap-3 max-w-[700px]">
-							<h3 className="font-bold text-lg">{confirmationDialog.title}</h3>
-							<p>{confirmationDialog.text}</p>
-							<div className="flex gap-1 mt-1">
-								<button
-									className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-									onClick={() => {
-										confirmationDialog.onConfirm();
-										setConfirmationDialog({
-											...confirmationDialog,
-											isOpen: false,
-										});
-									}}
-								>
-									Confirm
-								</button>
-								<button
-									className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
-									onClick={() => {
-										confirmationDialog.onCancel();
-										setConfirmationDialog({
-											...confirmationDialog,
-											isOpen: false,
-										});
-									}}
-								>
-									Cancel
-								</button>
-							</div>
-						</div>
-					</div>
-				)}
-				<UploadIndicator isUploading={isUploading} />
+
+				<ConfirmationDialogue
+					confirmationDialog={confirmationDialog}
+					setConfirmationDialog={setConfirmationDialog}
+				/>
+
+				<Alert alert={alert} setAlert={setAlert} />
+
+				<ProgressIndicator
+					isVisible={isClassifying}
+					progress={classifierProgress}
+				/>
+
+				<AppInfoModal isOpen={showInfoModal} setIsOpen={setShowInfoModal} />
 			</div>
 		</AppContext.Provider>
 	);
 
+	// ********************
+	// ** Event Handlers **
+	// ********************
+
+	// handleItemClick is called when the user clicks on an item in the grid
 	function handleItemClick(event: any, item: any) {
 		// if the user is holding down the shift+control keys, add the item to the list
 		if (event.ctrlKey) {
@@ -462,46 +313,184 @@ export default function Home() {
 		event.stopPropagation();
 	}
 
+	// handleFullscreen is called when the user clicks on the fullscreen icon on an item in the grid
 	function handleFullscreen(e: any, item: any) {
 		e.stopPropagation();
 		setFullSizeImage(item);
 	}
 
+	// handleDelete is called when the user clicks on the delete icon on an item in the grid
 	function handleDelete(e: any, item: any) {
 		e.stopPropagation();
-		setPhotos((photos: Photo[]) => photos.filter((p) => p.id !== item.id));
+		const newPhotos = photos.filter((p) => p.id !== item.id);
+		setPhotos(newPhotos);
+	}
+
+	// handleFileUpload is called when the user uploads a file using the file input
+	function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+		const files = e.target.files;
+		let newPhotos: Photo[] = [];
+		if (files) {
+			for (let i = 0; i < files.length; i++) {
+				const file = files[i];
+				const id = uuid();
+				const localFileUrl = URL.createObjectURL(file);
+				const newPhoto = new Photo({
+					tag: null,
+					filename: file.name,
+					file: file,
+					localFileUrl: localFileUrl,
+					remoteFileUrl: null,
+					id: id,
+				});
+				newPhotos.push(newPhoto);
+			}
+		}
+		setPhotos([...photos, ...newPhotos]);
+	}
+
+	async function handlePredict() {
+		let photosToClassify = photos;
+
+		// if only selected photos should be classified, only use those
+		if (selectedItems.length > 0) {
+			photosToClassify = selectedItems;
+		}
+
+		if (classifier.current && photos.length > 0 && tags.length > 0) {
+
+			// send photos and tags to classifier
+			classifier.current.postMessage({
+				photos: photosToClassify.map((photo: Photo) => {
+					return {
+						url: photo.localFileUrl,
+						id: photo.id,
+					};
+				}),
+				tags: tags.map((tag: Tag) => tag.text),
+			});
+
+			setIsClassifying(true);
+
+			// set up a listener for messages from the classifier
+			const onMessageReceived = (e: MessageEvent<any>) => {
+				switch (e.data.type) {
+					case "classifier-started":
+						setClassifierProgress(e.data.progress);
+						// set isClassifying to true to display the progress bar
+						break;
+					case "classifier-progress":
+						setClassifierProgress(e.data.progress);
+						const newPhotos = [...photos];
+
+						// find the prediction with the highest score
+						const prediction = e.data.prediction.probabilities.reduce(
+							(prev: any, current: any) => {
+								return prev.score > current.score ? prev : current;
+							}
+						);
+
+						const photo = newPhotos.find(
+							(photo) => photo.id === e.data.prediction.photoId
+						);
+						if (photo) {
+							photo.tag =
+								tags.find((tag) => tag.text === prediction.label) || null;
+						}
+
+						break;
+					case "classifier-finished":
+						// set isClassifying to false to hide the progress bar after 3s
+						setIsClassifying(false);
+						setClassifierProgress({
+							current: 0,
+							total: 0,
+						});
+						break;
+				}
+			};
+			classifier.current?.addEventListener("message", onMessageReceived);
+
+		} else if (!classifier.current) {
+			setAlert({
+				isOpen: true,
+				title: "Classifier not loaded",
+				text: "Try again in a moment, the classifier is still loading.",
+			});
+		} else if (photos.length === 0) {
+			setAlert({
+				isOpen: true,
+				title: "No photos",
+				text: "Upload some photos to start applying tags to them.",
+			});
+		} else if (tags.length === 0) {
+			setAlert({
+				isOpen: true,
+				title: "No tags",
+				text: "Upload some tags to start applying them to photos.",
+			});
+		}
+	}
+
+	function handleDownloadPhotos(
+		options: {
+			isUsingSubfolders: boolean;
+			numberByGridOrder: boolean;
+			onlyDownloadSelected: boolean;
+		},
+		photosToDownload = photos
+	) {
+		// create a zip file with the photos organized into subfolders by tag
+		const zip = new JSZip();
+		const subfolders: { [key: string]: JSZip } = {};
+
+		photosToDownload.forEach((photo: Photo, index: number) => {
+			const tag = photo.tag;
+			if (tags.length > 0 && options.isUsingSubfolders) {
+				if (tag) {
+					if (!subfolders[tag.text]) {
+						// add isUsingSubfolders check here
+						subfolders[tag.text] = zip.folder(tag.text) as JSZip;
+					}
+					if (options.numberByGridOrder) {
+						subfolders[tag.text].file(
+							`${index + 1}-${photo.filename}` as string,
+							photo.file as Blob
+						);
+					} else {
+						subfolders[tag.text].file(
+							photo.filename as string,
+							photo.file as Blob
+						);
+					}
+				} else {
+					subfolders["untagged"] = zip.folder("untagged") as JSZip;
+					if (options.numberByGridOrder) {
+						subfolders["untagged"].file(
+							`${index + 1}-${photo.filename}` as string,
+							photo.file as Blob
+						);
+					} else {
+						subfolders["untagged"].file(
+							photo.filename as string,
+							photo.file as Blob
+						);
+					}
+				}
+			} else {
+				if (options.numberByGridOrder) {
+					zip.file(
+						`${index + 1}-${photo.filename}` as string,
+						photo.file as Blob
+					);
+				} else {
+					zip.file(photo.filename as string, photo.file as Blob);
+				}
+			}
+		});
+
+		zip.generateAsync({ type: "blob" }).then((content) => {
+			saveAs(content, "sortedimages.zip");
+		});
 	}
 }
-
-// const getPredictionsFromTags = async (
-// 	photos: Photo[],
-// 	setPhotos: (photos: Photo[]) => void,
-// 	tags: Tag[]
-// ) => {
-// 	const formData = new FormData();
-// 	photos.forEach((photo) => {
-// 		formData.append("images", photo.file as Blob);
-// 	});
-// 	formData.append("classes", JSON.stringify(tags.map((tag) => tag.name)));
-// 	const response = await fetch(
-// 		`${process.env.NEXT_PUBLIC_BACKEND_URL}/predict`,
-// 		{
-// 			method: "POST",
-// 			body: formData,
-// 		}
-// 	);
-// 	const data = await response.json();
-// 	const predictions = data.predictions;
-// 	const newPhotos = photos.map((photo, index) => {
-// 		if (predictions[index].label === "*UNDEFINED*") {
-// 			return photo;
-// 		}
-// 		photo.tag = {
-// 			text: predictions[index].prediction,
-// 			confidence: predictions[index].confidence,
-// 			tag: tags.find((tag) => tag.name === predictions[index].prediction),
-// 		};
-// 		return photo;
-// 	});
-// 	setPhotos(newPhotos);
-// };

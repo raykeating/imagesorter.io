@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import Photo from "@/types/Photo";
-import { AppContext } from "@/pages";
+import { AppContext } from "@/util/appContext";
 import { useContext } from "react";
 
 import {
@@ -24,13 +24,11 @@ import PhotoCard from "./PhotoCard";
 import Image from "next/image";
 import { Clipboard } from "@/types/Clipboard";
 
-export default function GridSortingInterface({
+export default React.memo(function GridSortingInterface({
 	items,
 	setItems,
-	setFullSizeImage,
 	selectedItems,
 	setSelectedItems,
-	handleFileUpload,
 	addingTagWithId,
 	setAddingTagWithId,
 	handleDelete,
@@ -39,10 +37,8 @@ export default function GridSortingInterface({
 	clipboard,
 }: {
 	items: Photo[];
-	setItems: React.Dispatch<React.SetStateAction<any[]>>;
-	setFullSizeImage: React.Dispatch<React.SetStateAction<any>>;
+	setItems: (items: Photo[]) => void;
 	selectedItems: any[];
-	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	addingTagWithId: string | null;
 	setAddingTagWithId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -85,7 +81,7 @@ export default function GridSortingInterface({
 			modifiers={[restrictToWindowEdges]}
 		>
 			<SortableContext items={items} strategy={rectSortingStrategy}>
-				<div className={`grid grid-cols-${zoomLevel} gap-2 pb-[150px]`}>
+				<div className={`grid grid-cols-${zoomLevel} gap-2 pb-[180px]`}>
 					{items.map((item, index) => (
 						<SortablePhoto
 							key={item.id}
@@ -99,6 +95,7 @@ export default function GridSortingInterface({
 							setAddingTag={setAddingTagWithId}
 							handleDelete={(e: any) => handleDelete(e, item)}
 							handleFullscreen={(e: any) => handleFullscreen(e, item)}
+							setSelectedItems={setSelectedItems}
 							handleItemClick={(e: any) => handleItemClick(e, item)}
 							inClipboard={
 								clipboard.lastAction === "cut" &&
@@ -109,13 +106,13 @@ export default function GridSortingInterface({
 				</div>
 			</SortableContext>
 
-			<DragOverlay adjustScale={true}>
+			<DragOverlay>
 				<div className="relative scale-75">
-					{selectedItems.length > 1 ? (
+					{selectedItems.length > 1 && (
 						<span className="z-50 bg-red-600 text-white rounded-full absolute -left-1 -top-1 w-7 h-7 flex items-center justify-center">
 							{selectedItems.length}
 						</span>
-					) : null}
+					)}
 					{activeId && items.some((item) => item.id === activeId) ? (
 						<div className="relative h-[200px] w-[200px]">
 							{selectedItems
@@ -194,4 +191,4 @@ export default function GridSortingInterface({
 	function handleDragCancel() {
 		setActiveId(null);
 	}
-}
+});

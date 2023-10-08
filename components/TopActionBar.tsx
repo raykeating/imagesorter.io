@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import FileInput from "./FileInput";
 import ActionBarTagSelector from "./ActionBarTagSelector";
-import { AppContext } from "@/pages";
+import { AppContext } from "@/util/appContext";
 import Photo from "@/types/Photo";
 
 export default function TopActionBar({

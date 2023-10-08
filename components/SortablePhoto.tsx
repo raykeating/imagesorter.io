@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { Profiler, useEffect } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Photo from "@/types/Photo";
@@ -17,6 +17,7 @@ export const SortablePhoto = ({
 	handleItemClick,
 	handleDelete,
 	handleFullscreen,
+	setSelectedItems,
 	inClipboard,
 }: {
 	id: string;
@@ -39,6 +40,7 @@ export const SortablePhoto = ({
 		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
 		photo: Photo
 	) => void;
+	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	inClipboard: boolean;
 }) => {
 	const sortable = useSortable({ id });
@@ -59,6 +61,7 @@ export const SortablePhoto = ({
 				handleItemClick={handleItemClick}
 				handleDelete={handleDelete}
 				handleFullscreen={handleFullscreen}
+				setSelectedItems={setSelectedItems}
 				sortableRef={setNodeRef}
 				sortableStyle={style}
 				inClipboard={inClipboard}

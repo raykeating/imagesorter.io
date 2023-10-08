@@ -1,6 +1,6 @@
 import { Tag } from "@/types/Photo";
 import React, { useContext, useEffect, useState } from "react";
-import { AppContext } from "@/pages/index";
+import { AppContext } from "@/util/appContext";
 import SearchableSelect from "./SearchableSelect";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover } from "react-tiny-popover";
@@ -10,6 +10,7 @@ type Props = {
 	tag: Tag | null;
 	addingTag: string | null;
 	setAddingTag: React.Dispatch<React.SetStateAction<string | null>>;
+	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	isHovered: boolean;
 };
 
@@ -18,6 +19,7 @@ export default function PhotoTagger({
 	tag,
 	addingTag,
 	setAddingTag,
+	setSelectedItems,
 	isHovered,
 }: Props) {
 	const { setPhotos } = useContext(AppContext);
@@ -97,6 +99,7 @@ export default function PhotoTagger({
 								setAddingTag={setAddingTag}
 								searchValue={searchValue}
 								setSearchValue={setSearchValue}
+								setSelectedItems={setSelectedItems}
 							/>
 						</motion.div>
 					)}
@@ -128,7 +131,7 @@ export default function PhotoTagger({
 											? handleClearButtonClick
 											: handleAddTag
 									}
-									className="bg-white/40 hover:bg-white/75  z-20 backdrop-blur h-7 w-7 rounded-sm shadow shadow-black/25 hover:shadow-black/50 transition-all flex items-center justify-center aspect-square relative"
+									className="bg-white/40 hover:bg-white/75  z-20  h-7 w-7 rounded-sm shadow shadow-black/25 hover:shadow-black/50 transition-all flex items-center justify-center aspect-square relative"
 									onMouseEnter={startTooltipTimer}
 									onMouseLeave={clearTooltipTimer}
 								>
