@@ -11,9 +11,8 @@ export default function UndoButtons({
 }: Props) {
 
   const btnStyle =
-		"bg-white/10 w-10  h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
-	const activeBtnStyle =
-		"bg-black w-10 h-10 rounded-lg p-2 flex items-center justify-center text-white text-shadow";
+		"bg-white/10 w-10 text-white/60 h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
+
   const [undoHighlight, setUndoHighlight] = React.useState<boolean>(false);
   const [redoHighlight, setRedoHighlight] = React.useState<boolean>(false);
 
@@ -29,13 +28,13 @@ export default function UndoButtons({
           setRedoHighlight(true);
           setTimeout(() => {
             setRedoHighlight(false);
-          }, 600);
+          }, 100);
 				} else {
 					undoPhotos();
           setUndoHighlight(true);
           setTimeout(() => {
             setUndoHighlight(false);
-          }, 600);
+          }, 100);
 				}
 			}
 		};
@@ -49,7 +48,7 @@ export default function UndoButtons({
 
   return (
     <div className="flex gap-1">
-      <div
+      <button
         onClick={undoPhotos}
         className={`${btnStyle} ${
           undoHighlight
@@ -58,8 +57,8 @@ export default function UndoButtons({
         }`}
       >
         <i className="text-white fa-solid fa-rotate-left"></i>
-      </div>
-      <div
+      </button>
+      <button
         onClick={redoPhotos}
         className={`${btnStyle} ${
           redoHighlight
@@ -68,7 +67,7 @@ export default function UndoButtons({
         }`}
       >
         <i className="text-white fa-solid fa-rotate-right"></i>
-      </div>
+      </button>
     </div>
   );
 }

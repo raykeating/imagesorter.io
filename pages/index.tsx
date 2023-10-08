@@ -1,58 +1,38 @@
-import React, { useState, useEffect, useRef } from "react";
+// Libraries
+import React, { useState, useEffect } from "react";
+import { v4 as uuid } from "uuid";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import Image from "next/dist/client/image";
+
+// Components
+import GridSortingInterface from "@/components/GridSortingInterface";
+import FullSizeImageOverlay from "@/components/FullSizeImageOverlay";
+import ProgressIndicator from "@/components/ProgressIndicator";
+import TopActionBar from "@/components/TopActionBar";
+import Drawers from "@/components/Drawers";
+import Alert from "@/components/Alert";
+import ConfirmationDialogue from "@/components/ConfirmationDialogue";
+import ZoomButtons from "@/components/ZoomButtons";
+import AppInfoModal from "@/components/AppInfoModal";
+
+// Custom Hooks and Utilities
+import useClassifier from "@/util/hooks/useClassifier";
+import useUndoableState from "@/util/hooks/useUndoableState";
+import useKeyboardActions from "@/util/hooks/useKeyboardActions";
+import useKeypressListener from "@/util/hooks/useKeypressListener";
+import getActions from "@/util/actions";
+import { AppContext } from "@/util/appContext";
+import { getInitialPhotos, initialTags } from "@/util/initialData";
+
+// Types
 import { Tag } from "@/types/Photo";
 import Photo from "@/types/Photo";
 import { Clipboard } from "@/types/Clipboard";
-import { v4 as uuid } from "uuid";
-import GridSortingInterface from "@/components/GridSortingInterface";
-import FullSizeImageOverlay from "@/components/FullSizeImageOverlay";
-import useUndoableState from "@/util/hooks/useUndoableState";
-import UploadIndicator from "@/components/UploadIndicator";
-import getActions from "@/util/actions";
-import TopActionBar from "@/components/TopActionBar";
-import Drawers from "@/components/Drawers";
-import useClipboardActions from "@/util/hooks/useClipboardActions";
 import { PressableKeys } from "@/types/PressableKeys";
-import useKeypressListener from "@/util/hooks/useKeypressListener";
-import ConfirmationDialogue from "@/components/ConfirmationDialogue";
-import { AppContext } from "@/util/appContext";
-import { pipeline, Pipeline } from "@xenova/transformers";
-import Alert from "@/components/Alert";
-import getNextTagColor from "@/util/getNextTagColor";
-import Compressor from "compressorjs";
+import { ClassifierOutput } from "@/types/Classifier";
 
 export default function Home() {
-	// **** Worker ****
-
-	// Create a reference to the worker object.
-	// const worker = useRef<Worker | null>(null);
-
-	// We use the `useEffect` hook to setup the worker as soon as the `App` component is mounted.
-	// https://huggingface.co/docs/transformers.js/tutorials/react
-	// useEffect(() => {
-	// 	if (!worker.current) {
-	// 		// Create the worker if it does not yet exist.
-	// 		worker.current = new Worker(new URL("./worker.ts", import.meta.url), {
-	// 			type: "module",
-	// 		});
-	// 	}
-
-	// 	// Create a callback function for messages from the worker thread.
-	// 	const onMessageReceived = (e: MessageEvent<any>) => {
-	// 		switch (e.data.type) {
-	// 			case "classifier-results":
-
-	// 		}
-	// 	};
-
-	// 	// Attach the callback function as an event listener.
-	// 	worker.current.addEventListener("message", onMessageReceived);
-
-	// 	// Define a cleanup function for when the component is unmounted.
-	// 	return () => {
-	// 		worker.current?.removeEventListener("message", onMessageReceived);
-	// 	};
-	// });
-
 	// **** App State ****
 
 	// useUndoableState is a custom hook that returns an array with the state,
@@ -63,18 +43,7 @@ export default function Home() {
 	);
 
 	// tags is an array of Tag objects that are currently in the app state.
-	const [tags, setTags] = useState<Tag[]>([]);
-
-	// function rotateHue(increment: number, count: number) {
-	// 	const colors = Array.from({ length: count }, (_, index) => {
-	// 		const hue = (index * increment) % 300 + 200;
-	// 		return `hsl(${hue}, 70%, 40%)`;
-	// 	});
-
-	// 	console.log(colors);
-
-	// 	return colors;
-	// }
+	const [tags, setTags] = useState<Tag[]>(initialTags);
 
 	// addingTagWithId is a string that is the id of the photo that is currently
 	// being tagged.  It is used to display the tag selector in the photo card
@@ -99,10 +68,6 @@ export default function Home() {
 	const [isTopBarTagSelectorOpen, setIsTopBarTagSelectorOpen] =
 		useState<boolean>(false);
 
-	// isUploading is a boolean that is true when things are being uploaded to the
-	// server.  It is used to display a loading indicator.
-	const [isUploading, setIsUploading] = useState<boolean>(false);
-
 	// currently, toasts are hidden behind the drawers, so they are not visible
 	const [toasts, setToasts] = useState<string[]>([]);
 
@@ -123,6 +88,7 @@ export default function Home() {
 		c: false,
 		x: false,
 		v: false,
+		delete: false,
 	});
 
 	// confirmationDialog is used to display a confirmation dialog.
@@ -134,12 +100,16 @@ export default function Home() {
 		text: string;
 		onConfirm: () => void;
 		onCancel: () => void;
+		confirmButtonText?: string;
+		cancelButtonText?: string;
 	}>({
 		isOpen: false,
 		title: "",
 		text: "",
 		onConfirm: () => {},
 		onCancel: () => {},
+		confirmButtonText: "Confirm",
+		cancelButtonText: "Cancel",
 	});
 
 	const [alert, setAlert] = useState<{
@@ -152,17 +122,16 @@ export default function Home() {
 		text: "",
 	});
 
-	// classifier is a function that takes an array of image urls and an array of
-	// tags and returns a promise that resolves to an array of arrays of tags.
-	// Each array of tags corresponds to the tags that the classifier thinks are
-	// relevant to the corresponding image.
-	// const [classifier, setClassifier] = useState<{
-	// 	classifier: Pipeline | null;
-	// }>({
-	// 	classifier: null,
-	// });
+	const [showInfoModal, setShowInfoModal] = useState<boolean>(false);
 
 	// **** Effects ****
+
+	// load initial photos
+	useEffect(() => {
+		getInitialPhotos().then((initialPhotos) => {
+			setPhotos(initialPhotos);
+		});
+	}, []);
 
 	// listen for changes to photos or selectedItems and update actions
 	useEffect(() => {
@@ -171,75 +140,26 @@ export default function Home() {
 
 	useKeypressListener(setKeysPressed);
 
-	useClipboardActions(
+	useKeyboardActions(
 		keysPressed,
 		photos,
 		setPhotos,
 		clipboard,
 		setClipboard,
-		selectedItems
+		selectedItems,
+		setSelectedItems
 	);
 
-	useEffect(() => {}, []);
-
-	// useEffect(() => {
-	// 	handlePredict();
-	// }, [photos, tags]);
-
-	// const handlePredict = () => {
-	// 	// const results = await classifier(
-	// 	// 	photos.map((photo: Photo) => photo.localFileUrl),
-	// 	// 	tags.map((tag: Tag) => tag.text)
-	// 	// );
-
-	// 	const callHandlePredict = async () => {
-	// 		if (worker.current && photos.length > 0 && tags.length > 0) {
-	// 			const results = worker.current.postMessage({
-	// 				photos: photos.map((photo: Photo) => photo.localFileUrl),
-	// 				tags: tags.map((tag: Tag) => tag.text),
-	// 			});
-
-	// 			// console.log(worker.current);
-
-	// 			// console.log(results);
-
-	// 			// const newPhotos = photos.map((photo: Photo, index: number) => {
-	// 			// 	const prediction = results[index].reduce(
-	// 			// 		(prev: any, current: any) => {
-	// 			// 			return prev.score > current.score ? prev : current;
-	// 			// 		}
-	// 			// 	);
-
-	// 			// 	return {
-	// 			// 		...photo,
-	// 			// 		tag: tags.find((tag: Tag) => tag.text === prediction.label) || null,
-	// 			// 	};
-	// 			// });
-
-	// 			// setPhotos(newPhotos);
-	// 		} else if (!worker.current) {
-	// 			setAlert({
-	// 				isOpen: true,
-	// 				title: "Classifier not loaded",
-	// 				text: "Try again in a moment, the classifier is still loading.",
-	// 			});
-	// 		} else if (photos.length === 0) {
-	// 			setAlert({
-	// 				isOpen: true,
-	// 				title: "No photos",
-	// 				text: "Upload some photos to start applying tags to them.",
-	// 			});
-	// 		} else if (tags.length === 0) {
-	// 			setAlert({
-	// 				isOpen: true,
-	// 				title: "No tags",
-	// 				text: "Upload some tags to start applying them to photos.",
-	// 			});
-	// 		}
-	// 	};
-
-	// 	callHandlePredict();
-	// };
+	// **** Classifier ****
+	const classifier = useClassifier();
+	const [isClassifying, setIsClassifying] = useState<boolean>(false);
+	const [classifierProgress, setClassifierProgress] = useState<{
+		current: number;
+		total: number;
+	}>({
+		current: 0,
+		total: 0,
+	});
 
 	return (
 		<AppContext.Provider
@@ -254,7 +174,6 @@ export default function Home() {
 				setConfirmationDialog,
 				zoomLevel,
 				setZoomLevel,
-				setIsUploading,
 				setAddingTagWithId,
 			}}
 		>
@@ -298,6 +217,25 @@ export default function Home() {
 				 **** Absolute elements and overlays ****
 				 **************************************/}
 
+				<div className="fixed top-4 left-4 flex gap-1">
+					<div className="px-2 py-1 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-400 opacity-80">
+						<Image
+							src="/ImageSorterLogo.png"
+							alt="Image Sorter Logo"
+							width={70}
+							height={40}
+							quality={100}
+						/>
+					</div>
+					<button
+						onClick={() => setShowInfoModal(true)}
+						className="px-3 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-black transition-colors"
+					>
+						<i className="fa-solid fa-info-circle"></i>
+					</button>
+				</div>
+				<ZoomButtons zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
+
 				<FullSizeImageOverlay
 					photo={fullSizeImage}
 					setFullSizeImage={setFullSizeImage}
@@ -307,7 +245,8 @@ export default function Home() {
 					undoPhotos={undoPhotos}
 					redoPhotos={redoPhotos}
 					selectedItems={selectedItems}
-					handlePredict={() => {}}
+					handlePredict={handlePredict}
+					handleDownloadPhotos={handleDownloadPhotos}
 				/>
 
 				<ConfirmationDialogue
@@ -317,7 +256,12 @@ export default function Home() {
 
 				<Alert alert={alert} setAlert={setAlert} />
 
-				<UploadIndicator isUploading={isUploading} />
+				<ProgressIndicator
+					isVisible={isClassifying}
+					progress={classifierProgress}
+				/>
+
+				<AppInfoModal isOpen={showInfoModal} setIsOpen={setShowInfoModal} />
 			</div>
 		</AppContext.Provider>
 	);
@@ -378,7 +322,8 @@ export default function Home() {
 	// handleDelete is called when the user clicks on the delete icon on an item in the grid
 	function handleDelete(e: any, item: any) {
 		e.stopPropagation();
-		setPhotos((photos: Photo[]) => photos.filter((p) => p.id !== item.id));
+		const newPhotos = photos.filter((p) => p.id !== item.id);
+		setPhotos(newPhotos);
 	}
 
 	// handleFileUpload is called when the user uploads a file using the file input
@@ -386,31 +331,166 @@ export default function Home() {
 		const files = e.target.files;
 		let newPhotos: Photo[] = [];
 		if (files) {
-			setIsUploading(true);
 			for (let i = 0; i < files.length; i++) {
-				console.log("compressing file");
-				new Compressor(files[i], {
-					quality: 0.3,
-					success: (compressedFile) => {
-						console.log("compressed file");
-						newPhotos.push(
-							new Photo({
-								tag: null,
-								filename: compressedFile.name,
-								file: compressedFile,
-								localFileUrl: URL.createObjectURL(compressedFile), //TODO - add another field for the original file
-								remoteFileUrl: null,
-								id: uuid(),
-							})
-						);
-						if (i === files.length - 1) {
-							console.log("done compressing files");
-							setPhotos([...photos, ...newPhotos]);
-							setIsUploading(false);
-						}
-					},
+				const file = files[i];
+				const id = uuid();
+				const localFileUrl = URL.createObjectURL(file);
+				const newPhoto = new Photo({
+					tag: null,
+					filename: file.name,
+					file: file,
+					localFileUrl: localFileUrl,
+					remoteFileUrl: null,
+					id: id,
 				});
+				newPhotos.push(newPhoto);
 			}
 		}
+		setPhotos([...photos, ...newPhotos]);
+	}
+
+	async function handlePredict() {
+		let photosToClassify = photos;
+
+		// if only selected photos should be classified, only use those
+		if (selectedItems.length > 0) {
+			photosToClassify = selectedItems;
+		}
+
+		if (classifier.current && photos.length > 0 && tags.length > 0) {
+
+			// send photos and tags to classifier
+			classifier.current.postMessage({
+				photos: photosToClassify.map((photo: Photo) => {
+					return {
+						url: photo.localFileUrl,
+						id: photo.id,
+					};
+				}),
+				tags: tags.map((tag: Tag) => tag.text),
+			});
+
+			setIsClassifying(true);
+
+			// set up a listener for messages from the classifier
+			const onMessageReceived = (e: MessageEvent<any>) => {
+				switch (e.data.type) {
+					case "classifier-started":
+						setClassifierProgress(e.data.progress);
+						// set isClassifying to true to display the progress bar
+						break;
+					case "classifier-progress":
+						setClassifierProgress(e.data.progress);
+						const newPhotos = [...photos];
+
+						// find the prediction with the highest score
+						const prediction = e.data.prediction.probabilities.reduce(
+							(prev: any, current: any) => {
+								return prev.score > current.score ? prev : current;
+							}
+						);
+
+						const photo = newPhotos.find(
+							(photo) => photo.id === e.data.prediction.photoId
+						);
+						if (photo) {
+							photo.tag =
+								tags.find((tag) => tag.text === prediction.label) || null;
+						}
+
+						break;
+					case "classifier-finished":
+						// set isClassifying to false to hide the progress bar after 3s
+						setIsClassifying(false);
+						setClassifierProgress({
+							current: 0,
+							total: 0,
+						});
+						break;
+				}
+			};
+			classifier.current?.addEventListener("message", onMessageReceived);
+
+		} else if (!classifier.current) {
+			setAlert({
+				isOpen: true,
+				title: "Classifier not loaded",
+				text: "Try again in a moment, the classifier is still loading.",
+			});
+		} else if (photos.length === 0) {
+			setAlert({
+				isOpen: true,
+				title: "No photos",
+				text: "Upload some photos to start applying tags to them.",
+			});
+		} else if (tags.length === 0) {
+			setAlert({
+				isOpen: true,
+				title: "No tags",
+				text: "Upload some tags to start applying them to photos.",
+			});
+		}
+	}
+
+	function handleDownloadPhotos(
+		options: {
+			isUsingSubfolders: boolean;
+			numberByGridOrder: boolean;
+			onlyDownloadSelected: boolean;
+		},
+		photosToDownload = photos
+	) {
+		// create a zip file with the photos organized into subfolders by tag
+		const zip = new JSZip();
+		const subfolders: { [key: string]: JSZip } = {};
+
+		photosToDownload.forEach((photo: Photo, index: number) => {
+			const tag = photo.tag;
+			if (tags.length > 0 && options.isUsingSubfolders) {
+				if (tag) {
+					if (!subfolders[tag.text]) {
+						// add isUsingSubfolders check here
+						subfolders[tag.text] = zip.folder(tag.text) as JSZip;
+					}
+					if (options.numberByGridOrder) {
+						subfolders[tag.text].file(
+							`${index + 1}-${photo.filename}` as string,
+							photo.file as Blob
+						);
+					} else {
+						subfolders[tag.text].file(
+							photo.filename as string,
+							photo.file as Blob
+						);
+					}
+				} else {
+					subfolders["untagged"] = zip.folder("untagged") as JSZip;
+					if (options.numberByGridOrder) {
+						subfolders["untagged"].file(
+							`${index + 1}-${photo.filename}` as string,
+							photo.file as Blob
+						);
+					} else {
+						subfolders["untagged"].file(
+							photo.filename as string,
+							photo.file as Blob
+						);
+					}
+				}
+			} else {
+				if (options.numberByGridOrder) {
+					zip.file(
+						`${index + 1}-${photo.filename}` as string,
+						photo.file as Blob
+					);
+				} else {
+					zip.file(photo.filename as string, photo.file as Blob);
+				}
+			}
+		});
+
+		zip.generateAsync({ type: "blob" }).then((content) => {
+			saveAs(content, "sortedimages.zip");
+		});
 	}
 }

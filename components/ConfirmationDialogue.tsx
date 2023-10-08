@@ -7,6 +7,8 @@ type Props = {
 		text: string;
 		onConfirm: () => void;
 		onCancel: () => void;
+		confirmButtonText?: string;
+		cancelButtonText?: string;
 	};
 	setConfirmationDialog: React.Dispatch<
 		React.SetStateAction<{
@@ -15,6 +17,8 @@ type Props = {
 			text: string;
 			onConfirm: () => void;
 			onCancel: () => void;
+			confirmButtonText?: string;
+			cancelButtonText?: string;
 		}>
 	>;
 };
@@ -41,7 +45,7 @@ export default function ConfirmationDialogue({
 									});
 								}}
 							>
-								Confirm
+								{confirmationDialog.confirmButtonText || "Confirm"}
 							</button>
 							<button
 								className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded"
@@ -53,7 +57,7 @@ export default function ConfirmationDialogue({
 									});
 								}}
 							>
-								Cancel
+								{confirmationDialog.cancelButtonText || "Cancel"}
 							</button>
 						</div>
 					</div>

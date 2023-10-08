@@ -1,23 +1,30 @@
 import React, { useState } from "react";
-import Drawer from "./Drawer";
-import DownloadDrawer from "./DownloadDrawer";
-import SettingsDrawer from "./SettingsDrawer";
-import TagsDrawer from "./TagsDrawer";
-import UndoButtons from "./UndoButtons";
+import Drawer from "@/components/Drawer";
+import DownloadDrawer from "@/components/DownloadDrawer";
+import SettingsDrawer from "@/components/SettingsDrawer";
+import TagsDrawer from "@/components/TagsDrawer";
+import UndoButtons from "@/components/UndoButtons";
 import Photo from "@/types/Photo";
+import Image from "next/image";
 
-type DrawerType = "tags" | "settings" | "download";
+type DrawerType = "tags" | "settings" | "download"; // settings is not currently used
 
 export default function Drawers({
 	undoPhotos,
 	redoPhotos,
 	selectedItems,
 	handlePredict,
+	handleDownloadPhotos,
 }: {
 	undoPhotos: () => void;
 	redoPhotos: () => void;
 	selectedItems: Photo[];
 	handlePredict: () => void;
+	handleDownloadPhotos: (options: {
+		isUsingSubfolders: boolean;
+		numberByGridOrder: boolean;
+		onlyDownloadSelected: boolean;
+	}) => void;
 }) {
 	const [openDrawer, setOpenDrawer] = useState<DrawerType | null>("tags");
 
@@ -26,11 +33,8 @@ export default function Drawers({
 			className="flex flex-col fixed right-0 bottom-0 w-full"
 			style={{ zIndex: 999 }}
 		>
-			<div className="flex justify-between items-center px-6 py-2">
-				<UndoButtons
-					undoPhotos={undoPhotos}
-					redoPhotos={redoPhotos}
-				/>
+			<div className="flex justify-between items-center px-4 py-2">
+				<UndoButtons undoPhotos={undoPhotos} redoPhotos={redoPhotos} />
 				<div className="flex gap-1">
 					<DrawerButton
 						setOpenDrawer={setOpenDrawer}
@@ -39,17 +43,12 @@ export default function Drawers({
 					/>
 					<DrawerButton
 						setOpenDrawer={setOpenDrawer}
-						type="settings"
-						active={openDrawer === "settings"}
-					/>
-					<DrawerButton
-						setOpenDrawer={setOpenDrawer}
 						type="download"
 						active={openDrawer === "download"}
 					/>
 				</div>
 			</div>
-			<Drawer>{getDrawer(openDrawer, selectedItems, handlePredict)}</Drawer>
+			<Drawer>{getDrawer(openDrawer, selectedItems, handlePredict, handleDownloadPhotos)}</Drawer>
 		</div>
 	);
 }
@@ -115,14 +114,28 @@ function DrawerButton({
 	);
 }
 
-function getDrawer(type: DrawerType | null, selectedItems: Photo[], handlePredict: () => void) {
+function getDrawer(
+	type: DrawerType | null,
+	selectedItems: Photo[],
+	handlePredict: () => void,
+	handleDownloadPhotos: (options: {
+		isUsingSubfolders: boolean;
+		numberByGridOrder: boolean;
+		onlyDownloadSelected: boolean;
+	}) => void,
+) {
 	switch (type) {
 		case "tags":
-			return <TagsDrawer handlePredict={handlePredict} />;
+			return <TagsDrawer handlePredict={handlePredict} selectedPhotos={selectedItems} />;
 		case "settings":
 			return <SettingsDrawer />;
 		case "download":
-			return <DownloadDrawer selectedPhotos={selectedItems}/>;
+			return (
+				<DownloadDrawer
+					selectedPhotos={selectedItems}
+					handleDownloadPhotos={handleDownloadPhotos}
+				/>
+			);
 		default:
 			return null;
 	}

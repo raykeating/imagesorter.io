@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { AppContext } from "@/util/appContext";
-import { Tag } from "@/types/Photo";
+import Photo, { Tag } from "@/types/Photo";
 import { v4 as uuid } from "uuid";
 import { tagColors } from "@/types/Photo";
 import { SyntheticEvent } from "react";
@@ -29,10 +29,12 @@ import getNextTagColor from "@/util/getNextTagColor";
 
 export default function TagsDrawer({
 	handlePredict,
+	selectedPhotos,
 }: {
 	handlePredict: () => void;
+	selectedPhotos: Photo[];
 }) {
-	const { tags, setTags } = useContext(AppContext);
+	const { tags, setTags, photos, setPhotos, setConfirmationDialog } = useContext(AppContext);
 	const [tagInput, setTagInput] = useState<string>("");
 	const [draggingTagID, setDraggingTagID] = useState<string | null>(null);
 	const [isLoadingPredictions, setIsLoadingPredictions] =
@@ -81,15 +83,14 @@ export default function TagsDrawer({
 
 	return (
 		<div className="flex flex-col gap-2 items-end w-full relative">
-			<div className="flex justify-between w-full">
-				<div className="flex gap-1">
-					<button
-						className="relative px-3 py-2 border-zinc-600 rounded border hover:border-zinc-300 transition-all active:border-zinc-300"
-						onClick={handlePredict}
-					>
-						Predict
-						<i className="fa-solid fa-bolt ml-1"></i>
-						{/* {isLoadingPredictions ? (
+			<div className="flex justify-end gap-2 w-full">
+				<button
+					className="relative px-3 py-2 border-zinc-600 rounded border hover:border-zinc-300 transition-all active:border-zinc-300"
+					onClick={() => handlePredict()}
+				>
+					Predict {!!selectedPhotos.length && `Selected (${selectedPhotos.length})`}
+					<i className="fa-solid fa-bolt ml-1"></i>
+					{/* {isLoadingPredictions ? (
 							<>
 								Predicting - 1 of {photos.length}
 								<i className="ml-2 fa-solid fa-circle-notch animate-spin"></i>
@@ -99,16 +100,16 @@ export default function TagsDrawer({
 								Predict from tags <i className="fa-solid fa-bolt"></i>
 							</>
 						)} */}
-					</button>
-					<div className="flex items-center justify-center"></div>
-					<button
-						className="relative px-3 py-2 border-zinc-600 rounded border hover:border-zinc-300 transition-all active:border-zinc-300"
-						onClick={handleSortImagesByTag}
-					>
-						Sort by tag order{" "}
-						<i className="fa-solid fa-sort text-zinc-300 text-sm ml-1"></i>
-					</button>
-				</div>
+						<span className="absolute -top-2 -right-2 text-xs bg-purple-900/40 backdrop-blur-sm px-1 py-[1px] rounded-sm text-purple-100">BETA</span>
+				</button>
+				<button
+					className="relative px-3 py-2 border-zinc-600 rounded border hover:border-zinc-300 transition-all active:border-zinc-300"
+					onClick={handleSortImagesByTag}
+				>
+					Sort by tag order{" "}
+					<i className="fa-solid fa-sort text-zinc-300 text-sm ml-1"></i>
+				</button>
+
 				<form onSubmit={handleAddTag} className="relative flex items-center">
 					<input
 						type="text"

@@ -10,9 +10,10 @@ type Props = {
 	searchValue: string;
 	setSearchValue: React.Dispatch<React.SetStateAction<string>>;
 	setAddingTag: React.Dispatch<React.SetStateAction<string | null>>;
+	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 };
 
-export default function SearchableSelect({ photoId, searchValue, setSearchValue, setAddingTag }: Props) {
+export default function SearchableSelect({ photoId, searchValue, setSearchValue, setAddingTag, setSelectedItems }: Props) {
 	const { tags, setTags, setPhotos } = useContext(AppContext);
 
 	const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -48,6 +49,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 			});
 			return updatedPhotos;
 		});
+		setSelectedItems([]);
 	};
 
 	const handleSelectOption = (

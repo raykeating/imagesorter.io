@@ -14,6 +14,7 @@ function FileInput({ handleFileUpload }: any) {
         ref={fileInputRef}
         type="file"
         className="hidden"
+        accept='image/.jpeg,.jpg,.png'
         onChange={handleFileUpload}
         multiple
       />

@@ -2,6 +2,7 @@ import React from "react";
 import { AppContext } from "@/util/appContext";
 import { useContext } from "react";
 
+// NOTE: This component is not currently in use
 export default function SettingsDrawer() {
 	const { zoomLevel, setZoomLevel } = useContext(AppContext);
 

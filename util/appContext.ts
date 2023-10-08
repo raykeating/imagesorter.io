@@ -26,7 +26,6 @@ export const AppContext = createContext<{
 	>;
 	zoomLevel: number;
 	setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
-	setIsUploading: React.Dispatch<React.SetStateAction<boolean>>;
 	setAddingTagWithId: React.Dispatch<React.SetStateAction<string | null>>;
 }>({
 	photos: [],
@@ -45,6 +44,5 @@ export const AppContext = createContext<{
 	setConfirmationDialog: () => {},
 	zoomLevel: 5,
 	setZoomLevel: () => {},
-	setIsUploading: () => {},
 	setAddingTagWithId: () => {},
 });

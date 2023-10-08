@@ -24,13 +24,11 @@ import PhotoCard from "./PhotoCard";
 import Image from "next/image";
 import { Clipboard } from "@/types/Clipboard";
 
-export default function GridSortingInterface({
+export default React.memo(function GridSortingInterface({
 	items,
 	setItems,
-	setFullSizeImage,
 	selectedItems,
 	setSelectedItems,
-	handleFileUpload,
 	addingTagWithId,
 	setAddingTagWithId,
 	handleDelete,
@@ -40,9 +38,7 @@ export default function GridSortingInterface({
 }: {
 	items: Photo[];
 	setItems: (items: Photo[]) => void;
-	setFullSizeImage: React.Dispatch<React.SetStateAction<any>>;
 	selectedItems: any[];
-	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	addingTagWithId: string | null;
 	setAddingTagWithId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -99,6 +95,7 @@ export default function GridSortingInterface({
 							setAddingTag={setAddingTagWithId}
 							handleDelete={(e: any) => handleDelete(e, item)}
 							handleFullscreen={(e: any) => handleFullscreen(e, item)}
+							setSelectedItems={setSelectedItems}
 							handleItemClick={(e: any) => handleItemClick(e, item)}
 							inClipboard={
 								clipboard.lastAction === "cut" &&
@@ -194,4 +191,4 @@ export default function GridSortingInterface({
 	function handleDragCancel() {
 		setActiveId(null);
 	}
-}
+});

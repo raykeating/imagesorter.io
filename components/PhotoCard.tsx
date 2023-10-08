@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import PhotoTagger from "./PhotoTagger";
 import { forwardRef } from "react";
 
-export default function PhotoCard({
+export default React.memo(function PhotoCard({
 	sortableRef,
 	sortableStyle,
 	addingTag,
@@ -13,6 +13,7 @@ export default function PhotoCard({
 	handleItemClick,
 	handleDelete,
 	handleFullscreen,
+	setSelectedItems,
 	photo,
 	inClipboard,
 	...props
@@ -33,6 +34,7 @@ export default function PhotoCard({
 		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
 		photo: Photo
 	) => void;
+	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	photo: Photo;
 	inClipboard: boolean;
 }) {
@@ -60,7 +62,6 @@ export default function PhotoCard({
 				style={{ objectFit: "cover" }}
 				className={`${inClipboard ? "opacity-50" : ""}`}
 				fill
-				quality={10}
 			/>
 			<div className="z-20 flex flex-col justify-between w-full h-full">
 				<PhotoTagger
@@ -69,6 +70,7 @@ export default function PhotoCard({
 					addingTag={addingTag}
 					setAddingTag={setAddingTag}
 					isHovered={isHovered}
+					setSelectedItems={setSelectedItems}
 				/>
 
 				<AnimatePresence>
@@ -98,4 +100,4 @@ export default function PhotoCard({
 			</div>
 		</div>
 	);
-}
+});

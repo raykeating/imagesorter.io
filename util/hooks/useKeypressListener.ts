@@ -38,6 +38,10 @@ export default function useKeypressListener(
 				setKeysPressed((kp: PressableKeys) => {
 					return { ...kp, v: true };
 				});
+			} else if (e.key === "Delete") {
+				setKeysPressed((kp: PressableKeys) => {
+					return { ...kp, delete: true };
+				});
 			}
 		};
 
@@ -73,6 +77,10 @@ export default function useKeypressListener(
 			} else if (e.key === "v") {
 				setKeysPressed((kp: PressableKeys) => {
 					return { ...kp, v: false };
+				});
+			} else if (e.key === "Delete") {
+				setKeysPressed((kp: PressableKeys) => {
+					return { ...kp, delete: false };
 				});
 			}
 		};

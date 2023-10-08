@@ -7,4 +7,5 @@ export type PressableKeys = {
 	c: boolean;
 	x: boolean;
 	v: boolean;
+	delete: boolean;
 };

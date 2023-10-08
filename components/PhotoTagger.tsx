@@ -10,6 +10,7 @@ type Props = {
 	tag: Tag | null;
 	addingTag: string | null;
 	setAddingTag: React.Dispatch<React.SetStateAction<string | null>>;
+	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	isHovered: boolean;
 };
 
@@ -18,6 +19,7 @@ export default function PhotoTagger({
 	tag,
 	addingTag,
 	setAddingTag,
+	setSelectedItems,
 	isHovered,
 }: Props) {
 	const { setPhotos } = useContext(AppContext);
@@ -97,6 +99,7 @@ export default function PhotoTagger({
 								setAddingTag={setAddingTag}
 								searchValue={searchValue}
 								setSearchValue={setSearchValue}
+								setSelectedItems={setSelectedItems}
 							/>
 						</motion.div>
 					)}

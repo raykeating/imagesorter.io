@@ -4,13 +4,14 @@ import Photo from "@/types/Photo";
 import { Clipboard } from "@/types/Clipboard";
 import { PressableKeys } from "@/types/PressableKeys";
 
-export default function useClipboardActions(
+export default function useKeyboardActions(
 	keysPressed: PressableKeys,
 	photos: Photo[],
 	setPhotos: (photos: Photo[]) => void,
 	clipboard: Clipboard,
 	setClipboard: (clipboard: Clipboard) => void,
-	selectedItems: Photo[]
+	selectedItems: Photo[],
+	setSelectedItems: (selectedItems: Photo[]) => void
 ) {
 	useEffect(() => {
 		// copy with ctrl+c
@@ -67,5 +68,16 @@ export default function useClipboardActions(
 				setPhotos(newPhotos);
 			}
 		}
+
+		// delete with delete key
+		if (keysPressed.delete) {
+			const newPhotos = photos.filter(
+				(photo) => !selectedItems.map((item) => item.id).includes(photo.id)
+			);
+			// deselect all
+			setSelectedItems([]);
+			setPhotos(newPhotos);
+		}
+
 	}, [keysPressed]);
 }
