@@ -115,7 +115,7 @@ export default function TagsDrawer({
 
 	return (
 		<div className="flex flex-col-reverse gap-2 items-end w-full relative">
-			<div className="flex justify-end gap-2 w-full">
+			<div className="flex justify-end gap-2 w-full flex-wrap">
 				{/* confidence input (text) */}
 				<div className="flex items-center border rounded border-zinc-600">
 					<span className="text-sm text-zinc-200 px-3 py-1">

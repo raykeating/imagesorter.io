@@ -192,7 +192,7 @@ export default function Home() {
 				 **** Main Grid and Action Bar ****
 				 ********************************/}
 
-				<div className="flex flex-col pt-8 max-w-[1000px] mx-auto gap-2 p-4">
+				<div className="flex flex-col pt-16 lg:pt-8 max-w-[1050px] mx-auto gap-2 p-4">
 					<TopActionBar
 						uploadedPhotoCount={photos.length}
 						selectedItems={selectedItems}
@@ -220,7 +220,7 @@ export default function Home() {
 				 **** Absolute elements and overlays ****
 				 **************************************/}
 
-				<div className="fixed top-4 left-4 flex gap-1">
+				<div className="fixed top-4 left-4 flex gap-1 z-[999]">
 					<div className="px-2 py-1 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-400 opacity-80">
 						<Image
 							src="/ImageSorterLogo.png"

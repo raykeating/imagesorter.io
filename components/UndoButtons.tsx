@@ -11,10 +11,7 @@ export default function UndoButtons({
 }: Props) {
 
   const btnStyle =
-		"bg-white/10 w-10 text-white/60 h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
-
-  const [undoHighlight, setUndoHighlight] = React.useState<boolean>(false);
-  const [redoHighlight, setRedoHighlight] = React.useState<boolean>(false);
+		"bg-white/60 lg:bg-white/10 lg:text-zinc-400 text-black backdrop-blur w-10 h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center";
 
   // call undo or redo when control+z or command+z is pressed
 	useEffect(() => {
@@ -25,16 +22,8 @@ export default function UndoButtons({
 			) {
 				if (e.shiftKey) {
           redoPhotos();
-          setRedoHighlight(true);
-          setTimeout(() => {
-            setRedoHighlight(false);
-          }, 100);
 				} else {
 					undoPhotos();
-          setUndoHighlight(true);
-          setTimeout(() => {
-            setUndoHighlight(false);
-          }, 100);
 				}
 			}
 		};
@@ -50,23 +39,15 @@ export default function UndoButtons({
     <div className="flex gap-1">
       <button
         onClick={undoPhotos}
-        className={`${btnStyle} ${
-          undoHighlight
-            ? "opacity-100"
-            : "opacity-60"
-        }`}
+        className={`${btnStyle}`}
       >
-        <i className="text-white fa-solid fa-rotate-left"></i>
+        <i className="fa-solid fa-rotate-left"></i>
       </button>
       <button
         onClick={redoPhotos}
-        className={`${btnStyle} ${
-          redoHighlight
-            ? "opacity-100"
-            : "opacity-60"
-        }`}
+        className={`${btnStyle}`}
       >
-        <i className="text-white fa-solid fa-rotate-right"></i>
+        <i className="fa-solid fa-rotate-right"></i>
       </button>
     </div>
   );

@@ -114,7 +114,7 @@ function DrawerButton({
 	};
 
 	const btnStyle =
-		"bg-white/10 w-10  h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
+		"bg-white/60 lg:bg-white/10 lg:text-zinc-400 text-black backdrop-blur w-10 h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400";
 	const activeBtnStyle =
 		"bg-black w-10 h-10 rounded-lg p-2 flex items-center justify-center text-white text-shadow";
 

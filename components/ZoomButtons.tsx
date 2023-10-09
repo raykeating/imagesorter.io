@@ -27,7 +27,7 @@ export default function ZoomButtons({ zoomLevel, setZoomLevel }: Props) {
 		"bg-white/10 w-10 text-white/60 h-10 hover:bg-black hover:text-white rounded-lg p-2 flex items-center justify-center text-zinc-400 transition-colors";
 
 	return (
-		<div className="flex gap-1 absolute top-4 right-4">
+		<div className="flex gap-1 absolute top-4 right-4 z-[999]">
 			<button onClick={decreaseZoom} className={btnStyle}>
 				<i className=" fa-solid fa-magnifying-glass-minus"></i>
 			</button>
