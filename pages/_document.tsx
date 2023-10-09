@@ -14,6 +14,9 @@ export default function Document() {
 					rel="stylesheet"
 				></link>
 				{/* SEO */}
+
+				<title>ImageSorter.io</title>
+
 				<meta name="title" content="ImageSorter.io" />
 				<meta
 					name="description"
