@@ -54,12 +54,14 @@ export default function AppInfoModal({ isOpen, setIsOpen }: Props) {
 					</h1>
 				</div>
 			</header>
-			<span className="text-xl mb-4 block">
-				<strong className="mr-1 block">
-					<i className="fa-solid fa-triangle-exclamation mr-1"></i>Sorry!
-				</strong>
-				This app is not currently supported on mobile devices.
-			</span>
+			{windowSize.width && windowSize.width < 768 && (
+				<span className="text-xl mb-4 block">
+					<strong className="mr-1 block">
+						<i className="fa-solid fa-triangle-exclamation mr-1"></i>Sorry!
+					</strong>
+					This app is not currently supported on mobile devices.
+				</span>
+			)}
 
 			<h3 className="text-xl font-bold">Features</h3>
 
