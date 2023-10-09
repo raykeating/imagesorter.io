@@ -9,7 +9,7 @@ function FileInput({ handleFileUpload }: any) {
 
   return (
     <div className="inline-block text-blue-500 hover:text-blue-800 cursor-pointer">
-      <span onClick={handleButtonClick} className="text-zinc-400 hover:text-zinc-300 transition-colors cursor-pointer">Upload <i className='fa-solid fa-upload'></i></span>
+      <span onClick={handleButtonClick} className="text-zinc-400 hover:text-zinc-300 transition-colors cursor-pointer">Add Images <i className='ml-1 fa-solid fa-upload'></i></span>
       <input
         ref={fileInputRef}
         type="file"
