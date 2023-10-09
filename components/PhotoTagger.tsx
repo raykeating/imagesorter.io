@@ -80,10 +80,10 @@ export default function PhotoTagger({
 	if (tag) {
 		return (
 			<div
-				className="z-20 text-[14px] text-white font-normal px-3 py-2 pr-6 leading-none self-end rounded flex gap-2 relative"
+				className="z-20 text-[14px] text-white font-normal px-3 py-2 pr-6 leading-none self-end rounded flex gap-2 relative max-w-full"
 				style={{ backgroundColor: tag.color }}
 			>
-				<span>{tag.text}</span>
+				<span className="max-w-full truncate">{tag.text}</span>
 				<button
 					className="flex items-center absolute right-0 top-0 h-full px-2"
 					onClick={handleRemoveTag}
