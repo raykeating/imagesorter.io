@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 
 type Props = {
@@ -7,6 +7,160 @@ type Props = {
 };
 
 export default function AppInfoModal({ isOpen, setIsOpen }: Props) {
+	type WindowSize = {
+		width: number | null;
+		height: number | null;
+	};
+
+	// get window size
+	const [windowSize, setWindowSize] = React.useState({
+		width: null,
+		height: null,
+	} as WindowSize);
+
+	useEffect(() => {
+		// Handler to call on window resize
+		function handleResize() {
+			// Set window width/height to state
+			setWindowSize({
+				width: window.innerWidth,
+				height: window.innerHeight,
+			});
+		}
+
+		// Add event listener
+		window.addEventListener("resize", handleResize);
+
+		// Call handler right away so state gets updated with initial window size
+		handleResize();
+
+		// Remove event listener on cleanup
+		return () => window.removeEventListener("resize", handleResize);
+	}, []); // Empty array ensures that effect is only run on mount
+
+	const infoContent = (
+		<div>
+			<header className="mb-6">
+				<div className="bg-black rounded p-3 text-white">
+					<Image
+						src="/ImageSorterLogo.png"
+						alt="Image Sorter Logo"
+						width={120}
+						height={60}
+						quality={100}
+					/>
+					<h1 className="inline ml-1 text-xl p-1 font-bold drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
+						A free tool for sorting and organizing your images
+					</h1>
+				</div>
+			</header>
+			<span className="text-xl mb-4 block">
+				<strong className="mr-1 block">
+					<i className="fa-solid fa-triangle-exclamation mr-1"></i>Sorry!
+				</strong>
+				This app is not currently supported on mobile devices.
+			</span>
+
+			<h3 className="text-xl font-bold">Features</h3>
+
+			<ol className="flex flex-col gap-5">
+				<li className="flex gap-3">
+					<div className="flex flex-col justify-center gap-1 w-1/2">
+						<strong>Drag &amp; Drop Sorting</strong>
+						<p>
+							Need to order your images in a specific way? Use the drag and drop
+							grid to arrange your images in the desired order.
+						</p>
+					</div>
+
+					<Image
+						src="/product-screenshots/drag-and-drop.png"
+						alt="Drag and Drop"
+						className="rounded shadow"
+						width={500}
+						height={400}
+						style={{
+							objectFit: "cover",
+							height: "150px",
+							width: "50%",
+						}}
+					/>
+				</li>
+				<li className="flex gap-3">
+					<div className="flex flex-col justify-center gap-1 w-1/2">
+						<strong>Image Tagging</strong>
+						<p>
+							Want to group images by theme, event, or category? Our tagging
+							feature allows you to easily assign labels to your images.
+						</p>
+					</div>
+
+					<Image
+						src="/product-screenshots/image-tagging.png"
+						alt="Drag and Drop"
+						className="rounded shadow"
+						width={500}
+						height={400}
+						style={{
+							objectFit: "cover",
+							height: "150px",
+							width: "50%",
+						}}
+					/>
+				</li>
+				<li className="flex gap-3">
+					<div className="flex flex-col justify-center gap-1 w-1/2">
+						<strong>Export your Images</strong>
+						<p>
+							Once you have your images sorted, you can download them as a zip
+							file. The images will be numbered to match the order you set in
+							the grid, and they will be organized into folders based on the
+							tags you assigned.
+						</p>
+					</div>
+
+					<Image
+						src="/product-screenshots/image-export.png"
+						alt="Drag and Drop"
+						className="rounded shadow"
+						width={500}
+						height={400}
+						style={{
+							objectFit: "cover",
+							height: "150px",
+							width: "50%",
+						}}
+					/>
+				</li>
+				<li className="flex gap-3">
+					<div className="flex flex-col justify-center gap-1 w-1/2">
+						<strong>AI-Powered Tagging (Beta)</strong>
+						<p>
+							Don&apos;t want to tag your images manually? Just enter your tags
+							and click{" "}
+							<span className="px-2 py-1 bg-zinc-800 text-white font-bold rounded text-sm">
+								Predict <i className="fa-solid fa-bolt text-xs"></i>
+							</span>
+						</p>
+					</div>
+
+					<Image
+						src="/product-screenshots/ai-classification.png"
+						alt="Drag and Drop"
+						className="rounded shadow"
+						width={500}
+						height={400}
+						style={{
+							objectFit: "cover",
+							height: "150px",
+							width: "50%",
+						}}
+					/>
+				</li>
+			</ol>
+		</div>
+	);
+
 	return (
 		<>
 			{isOpen && (
@@ -19,123 +173,15 @@ export default function AppInfoModal({ isOpen, setIsOpen }: Props) {
 							<i className="fa-solid fa-close text-white mt-[2px] text-2xl"></i>
 						</button>
 						<div className="p-8 bg-white/75 backdrop-blur  rounded flex flex-col gap-3 max-w-[700px] max-h-[80vh] overflow-y-scroll minimal-scrollbar">
-							<div>
-								<header className="mb-6">
-									<div className="bg-black rounded p-3 text-white">
-										<Image
-											src="/ImageSorterLogo.png"
-											alt="Image Sorter Logo"
-											width={120}
-											height={60}
-											quality={100}
-										/>
-										<h1 className="inline ml-1 text-xl p-1 font-bold drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
-											A free tool for sorting and organizing your images
-										</h1>
-									</div>
-								</header>
-
-								<h3 className="text-xl font-bold">Features</h3>
-
-								<ol className="flex flex-col gap-5">
-									<li className="flex gap-3">
-										<div className="flex flex-col justify-center gap-1 w-1/2">
-											<strong>Drag &amp; Drop Sorting</strong>
-											<p>
-												Need to order your images in a specific way? Use the
-												drag and drop grid to arrange your images in the desired
-												order.
-											</p>
-										</div>
-
-										<Image
-											src="/product-screenshots/drag-and-drop.png"
-											alt="Drag and Drop"
-											className="rounded shadow"
-											width={500}
-											height={400}
-											style={{
-												objectFit: "cover",
-												height: "150px",
-												width: "50%",
-											}}
-										/>
-									</li>
-									<li className="flex gap-3">
-										<div className="flex flex-col justify-center gap-1 w-1/2">
-											<strong>Image Tagging</strong>
-											<p>
-												Want to group images by theme, event, or category? Our
-												tagging feature allows you to easily assign labels to
-												your images.
-											</p>
-										</div>
-
-										<Image
-											src="/product-screenshots/image-tagging.png"
-											alt="Drag and Drop"
-											className="rounded shadow"
-											width={500}
-											height={400}
-											style={{
-												objectFit: "cover",
-												height: "150px",
-												width: "50%",
-											}}
-										/>
-									</li>
-									<li className="flex gap-3">
-										<div className="flex flex-col justify-center gap-1 w-1/2">
-											<strong>Export your Images</strong>
-											<p>
-												Once you have your images sorted, you can download them
-												as a zip file. The images will be numbered to match the
-												order you set in the grid, and they will be organized
-												into folders based on the tags you assigned.
-											</p>
-										</div>
-
-										<Image
-											src="/product-screenshots/image-export.png"
-											alt="Drag and Drop"
-											className="rounded shadow"
-											width={500}
-											height={400}
-											style={{
-												objectFit: "cover",
-												height: "150px",
-												width: "50%",
-											}}
-										/>
-									</li>
-									<li className="flex gap-3">
-										<div className="flex flex-col justify-center gap-1 w-1/2">
-											<strong>AI-Powered Tagging (Beta)</strong>
-											<p>
-												Don&apos;t want to tag your images manually? Just enter your
-												tags and click{" "}
-												<span className="px-2 py-1 bg-zinc-800 text-white font-bold rounded text-sm">
-													Predict <i className="fa-solid fa-bolt text-xs"></i>
-												</span>
-											</p>
-										</div>
-
-										<Image
-											src="/product-screenshots/ai-classification.png"
-											alt="Drag and Drop"
-											className="rounded shadow"
-											width={500}
-											height={400}
-											style={{
-												objectFit: "cover",
-												height: "150px",
-												width: "50%",
-											}}
-										/>
-									</li>
-								</ol>
-							</div>
+							{infoContent}
 						</div>
+					</div>
+				</div>
+			)}
+			{windowSize.width && windowSize.width < 768 && (
+				<div className="absolute z-[99999] top-0 right-0 flex items-center justify-center w-screen h-screen">
+					<div className="p-8 bg-white backdrop-blur  rounded flex flex-col gap-3  overflow-y-scroll minimal-scrollbar w-[90%] h-[90%]">
+						{infoContent}
 					</div>
 				</div>
 			)}
