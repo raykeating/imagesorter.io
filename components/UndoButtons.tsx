@@ -44,7 +44,7 @@ export default function UndoButtons({
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
-	}, []);
+	}, [redoPhotos, undoPhotos]);
 
   return (
     <div className="flex gap-1">

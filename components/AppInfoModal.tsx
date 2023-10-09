@@ -112,7 +112,7 @@ export default function AppInfoModal({ isOpen, setIsOpen }: Props) {
 										<div className="flex flex-col justify-center gap-1 w-1/2">
 											<strong>AI-Powered Tagging (Beta)</strong>
 											<p>
-												Don't want to tag your images manually? Just enter your
+												Don&apos;t want to tag your images manually? Just enter your
 												tags and click{" "}
 												<span className="px-2 py-1 bg-zinc-800 text-white font-bold rounded text-sm">
 													Predict <i className="fa-solid fa-bolt text-xs"></i>

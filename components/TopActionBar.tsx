@@ -19,7 +19,7 @@ export default function TopActionBar({
 	isTagSelectorOpen: boolean;
 	setIsTagSelectorOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-	const { setPhotos } = useContext(AppContext);
+	const { photos, setPhotos } = useContext(AppContext);
 
 	const [isFixed, setIsFixed] = useState<boolean>(false);
 
@@ -39,7 +39,7 @@ export default function TopActionBar({
 	// any time selectedItems changes, set isTagSelectorOpen to false
 	useEffect(() => {
 		setIsTagSelectorOpen(false);
-	}, [selectedItems]);
+	}, [selectedItems, setIsTagSelectorOpen]);
 
 	const handleTagSelectedClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
@@ -48,16 +48,16 @@ export default function TopActionBar({
 
 	const handleRemoveTagsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
-		setPhotos((prevPhotos: Photo[]) => {
-			const updatedPhotos = prevPhotos.map((photo) => {
-				if (selectedItems.includes(photo)) {
-					return { ...photo, tag: null };
-				} else {
-					return photo;
-				}
-			});
-			return updatedPhotos;
+
+		const updatedPhotos = [...photos].map((photo) => {
+			if (selectedItems.includes(photo)) {
+				return { ...photo, tag: null };
+			} else {
+				return photo;
+			}
 		});
+
+		setPhotos(updatedPhotos);
 	};
 
 	return (

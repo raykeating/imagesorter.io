@@ -133,7 +133,7 @@ export default function ActionBarTagSelector({
 							className="px-2 py-1 hover:bg-white/50 text-end flex justify-end items-center gap-2"
 							onClick={handleAddNewTag}
 						>
-							Create "{searchValue}"
+							Create &quot;{searchValue}&quot;
 							<div className="w-[6px] h-[6px] rounded-full bg-gray-400"></div>
 						</div>
 					)}

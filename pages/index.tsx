@@ -131,12 +131,12 @@ export default function Home() {
 		getInitialPhotos().then((initialPhotos) => {
 			setPhotos(initialPhotos);
 		});
-	}, []);
+	}, [setPhotos]);
 
 	// listen for changes to photos or selectedItems and update actions
 	useEffect(() => {
 		setActions(getActions(photos, setPhotos, selectedItems, setSelectedItems));
-	}, [photos, selectedItems]);
+	}, [photos, selectedItems, setPhotos]);
 
 	useKeypressListener(setKeysPressed);
 

@@ -13,8 +13,14 @@ type Props = {
 	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 };
 
-export default function SearchableSelect({ photoId, searchValue, setSearchValue, setAddingTag, setSelectedItems }: Props) {
-	const { tags, setTags, setPhotos } = useContext(AppContext);
+export default function SearchableSelect({
+	photoId,
+	searchValue,
+	setSearchValue,
+	setAddingTag,
+	setSelectedItems,
+}: Props) {
+	const { tags, setTags, photos, setPhotos } = useContext(AppContext);
 
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [filteredOptions, setFilteredOptions] = useState<Tag[]>(tags);
@@ -39,16 +45,17 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 	};
 
 	const selectOption = (option: Tag) => {
-		setPhotos((prevPhotos: Photo[]) => {
-			const updatedPhotos = prevPhotos.map((photo) => {
-				if (photo.id === photoId) {
-					return { ...photo, tag: option };
-				} else {
-					return photo;
-				}
-			});
-			return updatedPhotos;
+		const prevPhotos = [...photos];
+
+		const updatedPhotos = prevPhotos.map((photo) => {
+			if (photo.id === photoId) {
+				return { ...photo, tag: option };
+			} else {
+				return photo;
+			}
 		});
+
+		setPhotos(updatedPhotos);
 		setSelectedItems([]);
 	};
 
@@ -59,8 +66,6 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 		e.stopPropagation();
 		selectOption(option);
 	};
-
-	
 
 	const handleAddNewTag = (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.FormEvent
@@ -111,7 +116,6 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 						placeholder="Select or create tag"
 					/>
 				</form>
-				
 			</div>
 			{isOpen && (
 				<div className="bg-white/75  shadow-sm rounded overflow-y-scroll max-h-[115px] minimal-scrollbar">
@@ -134,7 +138,7 @@ export default function SearchableSelect({ photoId, searchValue, setSearchValue,
 							className="px-2 py-1 hover:bg-white/50 text-end flex justify-end items-center gap-2"
 							onClick={handleAddNewTag}
 						>
-							Create "{searchValue}"
+							Create &quot;{searchValue}&quot;
 							<div className="w-[6px] h-[6px] rounded-full bg-gray-400"></div>
 						</div>
 					)}
