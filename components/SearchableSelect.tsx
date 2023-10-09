@@ -127,7 +127,7 @@ export default function SearchableSelect({
 						>
 							{option.text}
 							<div
-								className="w-[6px] h-[6px] rounded-full"
+								className="w-[6px] h-[6px] rounded-full flex-shrink-0"
 								style={{ backgroundColor: option.color }}
 							></div>
 						</button>
