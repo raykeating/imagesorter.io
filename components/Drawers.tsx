@@ -42,11 +42,11 @@ export default function Drawers({
 
 	return (
 		<div
-			className="flex flex-col fixed right-0 bottom-0 w-full"
-			style={{ zIndex: 999 }}
+			className="flex flex-col fixed right-0 bottom-0 w-full p-0"
+			style={{ zIndex: 9999 }}
 			onClick={(e) => e.stopPropagation()}
 		>
-			<div className="flex justify-between items-center px-4 py-2">
+			<div className="flex justify-between items-center px-4 h-0 -translate-y-8">
 				<UndoButtons undoPhotos={undoPhotos} redoPhotos={redoPhotos} />
 				<div className="flex gap-1">
 					<DrawerButton
