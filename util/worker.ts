@@ -38,7 +38,10 @@ self.addEventListener("message", async (event) => {
 	});
 
 	// classify each photo
-	await Promise.all(photos.map((photo) => classify(photo, tags)));
+	// await Promise.all(photos.map((photo) => classify(photo, tags)));
+	for (let photo of photos) {
+		await classify(photo, tags);
+	}
 
 	async function classify(photo: { url: string; id: string }, tags: string[]) {
 		const probabilities = await classifier(photo.url, tags);

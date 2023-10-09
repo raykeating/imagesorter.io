@@ -1,17 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { AppContext } from "@/util/appContext";
-import Photo, { Tag } from "@/types/Photo";
+import Photo from "@/types/Photo";
 import { v4 as uuid } from "uuid";
-import { tagColors } from "@/types/Photo";
 import { SyntheticEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SortableTag } from "./SortableTag";
-import {
-	SortableContext,
-	useSortable,
-	horizontalListSortingStrategy,
-	rectSortingStrategy,
-} from "@dnd-kit/sortable";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import {
 	DndContext,
 	closestCenter,
@@ -21,24 +15,22 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { useDraggable } from "@dnd-kit/core";
-import { useDroppable } from "@dnd-kit/core";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { CSS } from "@dnd-kit/utilities";
 import getNextTagColor from "@/util/getNextTagColor";
 
 export default function TagsDrawer({
 	handlePredict,
 	selectedPhotos,
+	confidenceThreshold,
+	setConfidenceThreshold,
 }: {
 	handlePredict: () => void;
 	selectedPhotos: Photo[];
+	confidenceThreshold: number;
+	setConfidenceThreshold: React.Dispatch<React.SetStateAction<number>>;
 }) {
-	const { tags, setTags, photos, setPhotos, setConfirmationDialog } = useContext(AppContext);
+	const { tags, setTags, photos, setPhotos, setAlert } = useContext(AppContext);
 	const [tagInput, setTagInput] = useState<string>("");
 	const [draggingTagID, setDraggingTagID] = useState<string | null>(null);
-	const [isLoadingPredictions, setIsLoadingPredictions] =
-		useState<boolean>(true);
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -52,12 +44,25 @@ export default function TagsDrawer({
 	);
 
 	function handleTagInput(e: React.ChangeEvent<HTMLInputElement>): void {
-		setTagInput(e.target.value);
+		// tags will be used as filenames, so remove any special characters (except for _ and -)
+		const value = e.target.value.replace(/[^a-zA-Z0-9-_ ]/g, "");
+
+		setTagInput(value);
 	}
 
 	function handleAddTag(e: SyntheticEvent): void {
 		e.preventDefault();
 		if (tagInput === "") return;
+
+		// can't have duplicate tags
+		if (tags.some((t) => t.text.toLowerCase() === tagInput.toLowerCase())) {
+			setAlert({
+				isOpen: true,
+				title: "Duplicate tag",
+				text: `The tag "${tagInput}" already exists.`,
+			});
+			return;
+		}
 
 		const newTag = {
 			id: uuid(),
@@ -81,26 +86,58 @@ export default function TagsDrawer({
 		setPhotos(sortedPhotos);
 	}
 
+	function handleDragEnd(event: any) {
+		const { active, over } = event;
+		if (!active || !over) return;
+
+		if (active.id !== over.id) {
+			const oldIndex = tags.findIndex((t) => t.id === active.id);
+			const newIndex = tags.findIndex((t) => t.id === over.id);
+			const newTagOrder = arrayMove(tags, oldIndex, newIndex);
+			setTags(newTagOrder);
+		}
+		setDraggingTagID(null);
+	}
+
+	function handleChangeConfidenceThreshold(
+		e: React.ChangeEvent<HTMLInputElement>
+	) {
+		const value = parseInt(e.target.value);
+		if (!value) {
+			setConfidenceThreshold(0);
+			return;
+		}
+
+		if (value >= 0 && value <= 100) {
+			setConfidenceThreshold(value);
+		}
+	}
+
 	return (
-		<div className="flex flex-col gap-2 items-end w-full relative">
+		<div className="flex flex-col-reverse gap-2 items-end w-full relative">
 			<div className="flex justify-end gap-2 w-full">
+				{/* confidence input (text) */}
+				<div className="flex items-center border rounded border-zinc-600">
+					<span className="text-sm text-zinc-200 px-3 py-1">
+						Confidence threshold (%)
+					</span>
+					<input
+						type="text"
+						className="bg-black w-16 rounded-r px-3 pl-4 py-2 border-l border-zinc-600 text-white placeholder:text-zinc-400"
+						style={{ outline: "none" }}
+						placeholder="0"
+						value={confidenceThreshold || ""}
+						onChange={handleChangeConfidenceThreshold}
+					/>
+				</div>
+
 				<button
 					className="relative px-3 py-2 border-zinc-600 rounded border hover:border-zinc-300 transition-all active:border-zinc-300"
 					onClick={() => handlePredict()}
 				>
-					Predict {!!selectedPhotos.length && `Selected (${selectedPhotos.length})`}
+					Predict{" "}
+					{!!selectedPhotos.length && `Selected (${selectedPhotos.length})`}
 					<i className="fa-solid fa-bolt ml-1"></i>
-					{/* {isLoadingPredictions ? (
-							<>
-								Predicting - 1 of {photos.length}
-								<i className="ml-2 fa-solid fa-circle-notch animate-spin"></i>
-							</>
-						) : (
-							<>
-								Predict from tags <i className="fa-solid fa-bolt"></i>
-							</>
-						)} */}
-						<span className="absolute -top-2 -right-2 text-xs bg-purple-900/40 backdrop-blur-sm px-1 py-[1px] rounded-sm text-purple-100">BETA</span>
 				</button>
 				<button
 					className="relative px-3 py-2 border-zinc-600 rounded border hover:border-zinc-300 transition-all active:border-zinc-300"
@@ -156,17 +193,4 @@ export default function TagsDrawer({
 			</DndContext>
 		</div>
 	);
-
-	function handleDragEnd(event: any) {
-		const { active, over } = event;
-		if (!active || !over) return;
-
-		if (active.id !== over.id) {
-			const oldIndex = tags.findIndex((t) => t.id === active.id);
-			const newIndex = tags.findIndex((t) => t.id === over.id);
-			const newTagOrder = arrayMove(tags, oldIndex, newIndex);
-			setTags(newTagOrder);
-		}
-		setDraggingTagID(null);
-	}
 }

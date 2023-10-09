@@ -22,7 +22,7 @@ export default function PhotoTagger({
 	setSelectedItems,
 	isHovered,
 }: Props) {
-	const { setPhotos } = useContext(AppContext);
+	const { photos, setPhotos } = useContext(AppContext);
 
 	const [searchValue, setSearchValue] = useState<string>(""); // this could be moved to SearchableSelect.tsx, but needed to clear the search value when the user clicks the clear button
 	const [showingTooltip, setShowingTooltip] = useState<boolean>(false);
@@ -46,7 +46,24 @@ export default function PhotoTagger({
 
 	const handleAddTag = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.stopPropagation();
-		setAddingTag(photoId);
+		setAddingTag(photoId); // this will open the SearchableSelect
+	};
+
+	const handleRemoveTag = (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		e.stopPropagation();
+
+		const updatedPhotos = photos.map((photo) => {
+			if (photo.id === photoId) {
+				return { ...photo, tag: null };
+			} else {
+				return photo;
+			}
+		});
+
+		setAddingTag(null);
+		setPhotos(updatedPhotos);
 	};
 
 	const handleClearButtonClick = (
@@ -69,13 +86,7 @@ export default function PhotoTagger({
 				<span>{tag.text}</span>
 				<button
 					className="flex items-center absolute right-0 top-0 h-full px-2"
-					onClick={() =>
-						setPhotos((photos) =>
-							photos.map((photo) =>
-								photo.id === photoId ? { ...photo, tag: null } : photo
-							)
-						)
-					}
+					onClick={handleRemoveTag}
 				>
 					<i className="fa-solid fa-x text-[10px]"></i>
 				</button>

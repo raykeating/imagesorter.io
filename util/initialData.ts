@@ -29,7 +29,7 @@ async function getInitialPhotos() {
 		return new Photo({
 			id: index.toString(),
 			file: await fetch(path).then((r) => r.blob()),
-			filename: path,
+			filename: path.split("/").pop() as string,
 			localFileUrl: path,
 			remoteFileUrl: null,
 			tag: null,

@@ -11,11 +11,10 @@ type Props = {
 };
 
 export default function ActionBarTagSelector({
-	photos,
 	selectedPhotos,
 	setAddingTag,
 }: Props) {
-	const { tags, setTags, setPhotos } = useContext(AppContext);
+	const { tags, setTags, photos, setPhotos } = useContext(AppContext);
 
 	const [searchValue, setSearchValue] = useState<string>("");
 	const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -44,16 +43,18 @@ export default function ActionBarTagSelector({
 		setSearchValue("");
 		setAddingTag(false);
 		// add option to each photo in selectedPhotos
-		setPhotos((prevPhotos: Photo[]) => {
-			const updatedPhotos = prevPhotos.map((photo) => {
-				if (selectedPhotos.includes(photo)) {
-					return { ...photo, tag: option };
-				} else {
-					return photo;
-				}
-			});
-			return updatedPhotos;
+
+		const prevPhotos = [...photos];
+
+		const updatedPhotos = prevPhotos.map((photo) => {
+			if (selectedPhotos.includes(photo)) {
+				return { ...photo, tag: option };
+			} else {
+				return photo;
+			}
 		});
+
+		setPhotos(updatedPhotos);
 	};
 
 	const handleSelectOption = (

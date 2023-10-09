@@ -152,6 +152,7 @@ export default function Home() {
 
 	// **** Classifier ****
 	const classifier = useClassifier();
+	const [confidenceThreshold, setConfidenceThreshold] = useState<number>(80);
 	const [isClassifying, setIsClassifying] = useState<boolean>(false);
 	const [classifierProgress, setClassifierProgress] = useState<{
 		current: number;
@@ -175,6 +176,8 @@ export default function Home() {
 				zoomLevel,
 				setZoomLevel,
 				setAddingTagWithId,
+				alert,
+				setAlert,
 			}}
 		>
 			<div
@@ -182,6 +185,7 @@ export default function Home() {
 					e.stopPropagation();
 					setSelectedItems([]);
 					setIsTopBarTagSelectorOpen(false);
+					setAddingTagWithId(null);
 				}}
 			>
 				{/********************************
@@ -200,7 +204,6 @@ export default function Home() {
 					<GridSortingInterface
 						items={photos}
 						setItems={setPhotos}
-						setFullSizeImage={(photo: Photo) => setFullSizeImage(photo)}
 						selectedItems={selectedItems}
 						setSelectedItems={setSelectedItems}
 						handleFileUpload={handleFileUpload}
@@ -247,6 +250,8 @@ export default function Home() {
 					selectedItems={selectedItems}
 					handlePredict={handlePredict}
 					handleDownloadPhotos={handleDownloadPhotos}
+					confidenceThreshold={confidenceThreshold}
+					setConfidenceThreshold={setConfidenceThreshold}
 				/>
 
 				<ConfirmationDialogue
@@ -358,7 +363,6 @@ export default function Home() {
 		}
 
 		if (classifier.current && photos.length > 0 && tags.length > 0) {
-
 			// send photos and tags to classifier
 			classifier.current.postMessage({
 				photos: photosToClassify.map((photo: Photo) => {
@@ -390,12 +394,15 @@ export default function Home() {
 							}
 						);
 
-						const photo = newPhotos.find(
-							(photo) => photo.id === e.data.prediction.photoId
-						);
-						if (photo) {
-							photo.tag =
-								tags.find((tag) => tag.text === prediction.label) || null;
+						// set the tag of the photo with the highest score to the predicted tag
+						if (prediction.score > confidenceThreshold / 100) {
+							const photo = newPhotos.find(
+								(photo) => photo.id === e.data.prediction.photoId
+							);
+							if (photo) {
+								photo.tag =
+									tags.find((tag) => tag.text === prediction.label) || null;
+							}
 						}
 
 						break;
@@ -410,7 +417,6 @@ export default function Home() {
 				}
 			};
 			classifier.current?.addEventListener("message", onMessageReceived);
-
 		} else if (!classifier.current) {
 			setAlert({
 				isOpen: true,
@@ -432,65 +438,87 @@ export default function Home() {
 		}
 	}
 
-	function handleDownloadPhotos(
-		options: {
-			isUsingSubfolders: boolean;
-			numberByGridOrder: boolean;
-			onlyDownloadSelected: boolean;
-		},
-		photosToDownload = photos
-	) {
+	function handleDownloadPhotos(options: {
+		isUsingSubfolders: boolean;
+		numberByGridOrder: boolean;
+		appendTagToFilename: boolean;
+		onlyDownloadSelected: boolean;
+	}) {
+		let photosToDownload = photos;
+
+		// if only selected photos should be downloaded, only use those
+		if (options.onlyDownloadSelected) {
+			photosToDownload = selectedItems;
+		}
+
 		// create a zip file with the photos organized into subfolders by tag
 		const zip = new JSZip();
 		const subfolders: { [key: string]: JSZip } = {};
 
-		photosToDownload.forEach((photo: Photo, index: number) => {
-			const tag = photo.tag;
-			if (tags.length > 0 && options.isUsingSubfolders) {
-				if (tag) {
-					if (!subfolders[tag.text]) {
-						// add isUsingSubfolders check here
-						subfolders[tag.text] = zip.folder(tag.text) as JSZip;
-					}
-					if (options.numberByGridOrder) {
-						subfolders[tag.text].file(
-							`${index + 1}-${photo.filename}` as string,
-							photo.file as Blob
-						);
-					} else {
-						subfolders[tag.text].file(
-							photo.filename as string,
-							photo.file as Blob
-						);
-					}
+		if (options.isUsingSubfolders && tags.length > 0) {
+			// create a subfolder for each tag
+			photosToDownload.forEach((photo, index) => {
+				const photosInFolder = photosToDownload.filter(
+					(p) => p.tag?.text === photo.tag?.text
+				);
+
+				const indexInFolder = photosInFolder.indexOf(photo);
+
+				let folder;
+				if (photo.tag) {
+					folder = `${photo.tag.text.toLowerCase()}/`;
 				} else {
-					subfolders["untagged"] = zip.folder("untagged") as JSZip;
-					if (options.numberByGridOrder) {
-						subfolders["untagged"].file(
-							`${index + 1}-${photo.filename}` as string,
-							photo.file as Blob
-						);
-					} else {
-						subfolders["untagged"].file(
-							photo.filename as string,
-							photo.file as Blob
-						);
-					}
+					folder = "";
 				}
-			} else {
-				if (options.numberByGridOrder) {
-					zip.file(
-						`${index + 1}-${photo.filename}` as string,
-						photo.file as Blob
-					);
-				} else {
-					zip.file(photo.filename as string, photo.file as Blob);
-				}
-			}
-		});
+				zip.file(
+					`${folder}${getFilename(
+						photo.filename,
+						index,
+						indexInFolder
+					)}` as string,
+					photo.file as Blob
+				);
+			});
+		} else {
+			// add each photo to the root of the zip file
+			photosToDownload.forEach((photo, index) => {
+				console.log(getFilename(photo.filename, index, index));
+				zip.file(
+					getFilename(photo.filename, index, index) as string,
+					photo.file as Blob
+				);
+			});
+		}
 
 		zip.generateAsync({ type: "blob" }).then((content) => {
 			saveAs(content, "sortedimages.zip");
 		});
+
+		function getFilename(
+			filename: string | null,
+			index: number,
+			indexInFolder: number
+		) {
+			console.log(filename);
+			console.log(photos[index]);
+
+			let finalFilename = "";
+
+			if (options.numberByGridOrder) {
+				finalFilename += `${indexInFolder + 1}-`;
+			}
+
+			if (options.appendTagToFilename) {
+				finalFilename += `${
+					photos[index].tag?.text.toLowerCase() || "untagged"
+				}-`;
+			}
+
+			finalFilename += filename || "";
+
+			console.log(finalFilename);
+
+			return finalFilename;
+		}
 	}
 }

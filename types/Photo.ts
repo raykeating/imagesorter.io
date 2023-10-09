@@ -5,7 +5,7 @@ interface Tag {
 	readonly id: string;
 	text: string;
 	color: string;
-	confidence: number | null;
+	confidence?: number | null; // global tags don't have confidence
 }
 
 interface DBTag {

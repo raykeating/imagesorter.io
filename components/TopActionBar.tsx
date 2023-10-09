@@ -68,14 +68,16 @@ export default function TopActionBar({
 		>
 			{uploadedPhotoCount > 0 && (
 				<div className="flex gap-4 items-center">
-					<span className="text-zinc-400 py-1 px-2 bg-zinc-700 rounded cursor-default select-none">
-						{selectedItems.length} Selected
-					</span>
+					{selectedItems.length > 0 && (
+						<span className="text-zinc-400 py-1 px-2 bg-zinc-700 rounded cursor-default select-none">
+							{selectedItems.length} Selected
+						</span>
+					)}
 
 					{actions.map((action) => {
 						return (
 							<button
-								className="text-zinc-400 hover:text-zinc-300 transition-colors cursor-pointer"
+								className="text-zinc-400 hover:text-zinc-300 transition-colors cursor-pointer py-1"
 								onClick={action.action}
 								key={action.text}
 							>

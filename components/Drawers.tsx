@@ -1,3 +1,4 @@
+// This file is messy.  Should be refactored soon.
 import React, { useState } from "react";
 import Drawer from "@/components/Drawer";
 import DownloadDrawer from "@/components/DownloadDrawer";
@@ -15,6 +16,8 @@ export default function Drawers({
 	selectedItems,
 	handlePredict,
 	handleDownloadPhotos,
+	confidenceThreshold,
+	setConfidenceThreshold,
 }: {
 	undoPhotos: () => void;
 	redoPhotos: () => void;
@@ -23,15 +26,25 @@ export default function Drawers({
 	handleDownloadPhotos: (options: {
 		isUsingSubfolders: boolean;
 		numberByGridOrder: boolean;
+		appendTagToFilename: boolean;
 		onlyDownloadSelected: boolean;
 	}) => void;
+	confidenceThreshold: number;
+	setConfidenceThreshold: React.Dispatch<React.SetStateAction<number>>;
 }) {
 	const [openDrawer, setOpenDrawer] = useState<DrawerType | null>("tags");
+
+	// download options
+	const [isUsingSubfolders, setIsUsingSubfolders] = useState<boolean>(true);
+	const [numberByGridOrder, setNumberByGridOrder] = useState<boolean>(true);
+	const [appendTagToFilename, setAppendTagToFilename] =
+		useState<boolean>(false);
 
 	return (
 		<div
 			className="flex flex-col fixed right-0 bottom-0 w-full"
 			style={{ zIndex: 999 }}
+			onClick={(e) => e.stopPropagation()}
 		>
 			<div className="flex justify-between items-center px-4 py-2">
 				<UndoButtons undoPhotos={undoPhotos} redoPhotos={redoPhotos} />
@@ -48,7 +61,24 @@ export default function Drawers({
 					/>
 				</div>
 			</div>
-			<Drawer>{getDrawer(openDrawer, selectedItems, handlePredict, handleDownloadPhotos)}</Drawer>
+			<Drawer>
+				{getDrawer(
+					openDrawer,
+					selectedItems,
+					handlePredict,
+					handleDownloadPhotos,
+					confidenceThreshold,
+					setConfidenceThreshold,
+					{
+						isUsingSubfolders,
+						setIsUsingSubfolders,
+						numberByGridOrder,
+						setNumberByGridOrder,
+						appendTagToFilename,
+						setAppendTagToFilename,
+					}
+				)}
+			</Drawer>
 		</div>
 	);
 }
@@ -121,12 +151,30 @@ function getDrawer(
 	handleDownloadPhotos: (options: {
 		isUsingSubfolders: boolean;
 		numberByGridOrder: boolean;
+		appendTagToFilename: boolean;
 		onlyDownloadSelected: boolean;
 	}) => void,
+	confidenceThreshold: number,
+	setConfidenceThreshold: React.Dispatch<React.SetStateAction<number>>,
+	downloadState: {
+		isUsingSubfolders: boolean;
+		setIsUsingSubfolders: React.Dispatch<React.SetStateAction<boolean>>;
+		numberByGridOrder: boolean;
+		setNumberByGridOrder: React.Dispatch<React.SetStateAction<boolean>>;
+		appendTagToFilename: boolean;
+		setAppendTagToFilename: React.Dispatch<React.SetStateAction<boolean>>;
+	}
 ) {
 	switch (type) {
 		case "tags":
-			return <TagsDrawer handlePredict={handlePredict} selectedPhotos={selectedItems} />;
+			return (
+				<TagsDrawer
+					handlePredict={handlePredict}
+					selectedPhotos={selectedItems}
+					confidenceThreshold={confidenceThreshold}
+					setConfidenceThreshold={setConfidenceThreshold}
+				/>
+			);
 		case "settings":
 			return <SettingsDrawer />;
 		case "download":
@@ -134,6 +182,12 @@ function getDrawer(
 				<DownloadDrawer
 					selectedPhotos={selectedItems}
 					handleDownloadPhotos={handleDownloadPhotos}
+					isUsingSubfolders={downloadState.isUsingSubfolders}
+					setIsUsingSubfolders={downloadState.setIsUsingSubfolders}
+					numberByGridOrder={downloadState.numberByGridOrder}
+					setNumberByGridOrder={downloadState.setNumberByGridOrder}
+					appendTagToFilename={downloadState.appendTagToFilename}
+					setAppendTagToFilename={downloadState.setAppendTagToFilename}
 				/>
 			);
 		default:

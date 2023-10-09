@@ -32,13 +32,14 @@ export default React.memo(function GridSortingInterface({
 	addingTagWithId,
 	setAddingTagWithId,
 	handleDelete,
-	handleFullscreen,
+	handleFullscreen,	
 	handleItemClick,
 	clipboard,
 }: {
 	items: Photo[];
 	setItems: (items: Photo[]) => void;
 	selectedItems: any[];
+	setSelectedItems: React.Dispatch<React.SetStateAction<any[]>>;
 	handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	addingTagWithId: string | null;
 	setAddingTagWithId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -88,8 +89,7 @@ export default React.memo(function GridSortingInterface({
 							id={item.id}
 							index={index}
 							photo={item}
-							selected={selectedItems.includes(item)}
-							selectedItemsLength={selectedItems.length}
+							selectedItems={selectedItems}
 							active={activeId === item.id}
 							addingTag={addingTagWithId}
 							setAddingTag={setAddingTagWithId}

@@ -27,6 +27,18 @@ export const AppContext = createContext<{
 	zoomLevel: number;
 	setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
 	setAddingTagWithId: React.Dispatch<React.SetStateAction<string | null>>;
+	alert: {
+		isOpen: boolean;
+		title: string;
+		text: string;
+	};
+	setAlert: React.Dispatch<
+		React.SetStateAction<{
+			isOpen: boolean;
+			title: string;
+			text: string;
+		}>
+	>;
 }>({
 	photos: [],
 	setPhotos: () => {},
@@ -45,4 +57,10 @@ export const AppContext = createContext<{
 	zoomLevel: 5,
 	setZoomLevel: () => {},
 	setAddingTagWithId: () => {},
+	alert: {
+		isOpen: false,
+		title: "",
+		text: "",
+	},
+	setAlert: () => {},
 });
