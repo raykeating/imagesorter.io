@@ -42,8 +42,8 @@ export default function ProgressIndicator({ isVisible, progress }: Props) {
 					</div>
 				) : (
 					<div className="fixed top-3 left-3" style={{ zIndex: 999 }}>
-						<div className="flex items-center gap-2 bg-black text-white p-3 rounded">
-							<i className="fas fa-circle-notch animate-spin"></i>
+						<div className="flex items-center gap-2 bg-black text-white px-3 py-2 rounded">
+							Loading Classifier... <i className="fas fa-circle-notch animate-spin"></i>
 						</div>
 					</div>
 				))}
