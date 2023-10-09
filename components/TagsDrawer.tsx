@@ -123,7 +123,7 @@ export default function TagsDrawer({
 					</span>
 					<input
 						type="text"
-						className="bg-black w-16 rounded-r px-3 pl-4 py-2 border-l border-zinc-600 text-white placeholder:text-zinc-400"
+						className="bg-black w-16 text-center rounded-r px-3 py-2 border-l border-zinc-600 text-white placeholder:text-zinc-400"
 						style={{ outline: "none" }}
 						placeholder="0"
 						value={confidenceThreshold || ""}
