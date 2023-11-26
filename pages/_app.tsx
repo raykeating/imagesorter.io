@@ -11,7 +11,7 @@ export default function App({ Component, pageProps }: AppProps) {
 				<meta name="title" content="ImageSorter.io" />
 				<meta
 					name="description"
-					content="A drag and drop interface for sorting, tagging, and organizing your images (with AI)!  No sign up required."
+					content="A drag and drop interface for sorting, tagging, and organizing your images (with AI)!  No sign up required.  Powered by OpenAI's CLIP zero-shot image classification model"
 				/>
 				
 				{/* Open Graph / Facebook */}
