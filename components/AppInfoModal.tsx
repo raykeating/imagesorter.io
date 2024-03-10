@@ -175,19 +175,19 @@ export default function AppInfoModal({ isOpen, setIsOpen }: Props) {
 								<p>At imagesorter.io, we prioritize the privacy and security of our users. Please read our privacy policy to understand how we handle your information:</p>
 
 								<h2 className="font-bold">No Storage or Retention of Photos:</h2>
-								<p>We do not store or retain any of the photos uploaded to our tool. All image classification processes occur within the user's browser, ensuring that photos remain solely on the user's device and are not transmitted or stored on our servers.</p>
+								<p>We do not store or retain any of the photos uploaded to our tool. All image classification processes occur within the user&apos;s browser, ensuring that photos remain solely on the user&apos;s device and are not transmitted or stored on our servers.</p>
 
 								<h2 className="font-bold">No Third-Party Image Classification Services:</h2>
-								<p>Our website does not utilize any third-party services for image classification. All image classification tasks are performed within the user's browser environment without involving external services or servers.</p>
+								<p>Our website does not utilize any third-party services for image classification. All image classification tasks are performed within the user&apos;s browser environment without involving external services or servers.</p>
 
 								<h2 className="font-bold">Tracking of Tag Information:</h2>
-								<p>We track information on tags for the purpose of enhancing user experience and improving our product. When users assign tags to images, the tag names are sent to a database and associated with the user's session. This data is used in an aggregated and anonymized manner to gain insights into user behavior and preferences.</p>
+								<p>We track information on tags for the purpose of enhancing user experience and improving our product. When users assign tags to images, the tag names are sent to a database and associated with the user&apos;s session. This data is used in an aggregated and anonymized manner to gain insights into user behavior and preferences.</p>
 
 								<h2 className="font-bold">Use of Tag Data:</h2>
 								<p>The tag data collected is utilized solely for internal purposes, including but not limited to analyzing user patterns, understanding user needs, and refining our product features. We do not share individual user tag data with any third parties.</p>
 
 								<h2 className="font-bold">Data Security:</h2>
-								<p>We employ industry-standard security measures to safeguard user data, including tag information. However, it's important to note that no method of transmission over the internet or electronic storage is completely secure, and we cannot guarantee absolute security of data.</p>
+								<p>We employ industry-standard security measures to safeguard user data, including tag information. However, it&apos;s important to note that no method of transmission over the internet or electronic storage is completely secure, and we cannot guarantee absolute security of data.</p>
 
 								<h2 className="font-bold">Changes to Privacy Policy:</h2>
 								<p>We reserve the right to update or modify this privacy policy at any time. Any changes made will be reflected on this page, and users will be notified of significant updates via email or prominent notices on our website.</p>
