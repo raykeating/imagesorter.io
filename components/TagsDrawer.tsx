@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import getNextTagColor from "@/util/getNextTagColor";
+import sendTagToDynamoDB from "@/util/sendTagToDynamoDB";
 
 export default function TagsDrawer({
 	handlePredict,
@@ -72,6 +73,10 @@ export default function TagsDrawer({
 		};
 		setTags([...tags, newTag]);
 		setTagInput("");
+
+		// submit tags to dynamoDB
+		sendTagToDynamoDB(newTag.text);
+
 		// getPredictions();
 	}
 

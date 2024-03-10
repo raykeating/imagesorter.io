@@ -54,14 +54,6 @@ export default function AppInfoModal({ isOpen, setIsOpen }: Props) {
 					</h1>
 				</div>
 			</header>
-			{windowSize.width && windowSize.width < 768 && (
-				<span className="text-xl mb-4 block">
-					<strong className="mr-1 block">
-						<i className="fa-solid fa-triangle-exclamation mr-1"></i>Sorry!
-					</strong>
-					This app is not currently supported on mobile devices.
-				</span>
-			)}
 
 			<h3 className="text-xl font-bold">Features</h3>
 
@@ -170,20 +162,43 @@ export default function AppInfoModal({ isOpen, setIsOpen }: Props) {
 					<div className="fixed top-0 left-0 w-screen h-screen bg-black/80 flex items-center justify-center z-[9999] p-4">
 						<button
 							onClick={() => setIsOpen(false)}
-							className="absolute top-10 right-10 p-4 rounded-lg bg-white/20 h-12 w-12 flex items-center justify-center backdrop-blur hover:bg-white/40 transition-colors"
+							className="absolute top-10 z-50 right-10 p-4 rounded-lg bg-white/20 h-12 w-12 flex items-center justify-center backdrop-blur hover:bg-white/40 transition-colors"
 						>
 							<i className="fa-solid fa-close text-white mt-[2px] text-2xl"></i>
 						</button>
 						<div className="p-8 bg-white/75 backdrop-blur  rounded flex flex-col gap-3 max-w-[700px] max-h-[80vh] overflow-y-scroll minimal-scrollbar">
 							{infoContent}
+							<hr className=" border-zinc-500 my-4 mt-8" />
+							<div className="flex flex-col gap-2 text-xs">
+								<p><span className="font-bold mr-1 text-base">Privacy Policy:</span></p>
+
+								<p>At imagesorter.io, we prioritize the privacy and security of our users. Please read our privacy policy to understand how we handle your information:</p>
+
+								<h2 className="font-bold">No Storage or Retention of Photos:</h2>
+								<p>We do not store or retain any of the photos uploaded to our tool. All image classification processes occur within the user's browser, ensuring that photos remain solely on the user's device and are not transmitted or stored on our servers.</p>
+
+								<h2 className="font-bold">No Third-Party Image Classification Services:</h2>
+								<p>Our website does not utilize any third-party services for image classification. All image classification tasks are performed within the user's browser environment without involving external services or servers.</p>
+
+								<h2 className="font-bold">Tracking of Tag Information:</h2>
+								<p>We track information on tags for the purpose of enhancing user experience and improving our product. When users assign tags to images, the tag names are sent to a database and associated with the user's session. This data is used in an aggregated and anonymized manner to gain insights into user behavior and preferences.</p>
+
+								<h2 className="font-bold">Use of Tag Data:</h2>
+								<p>The tag data collected is utilized solely for internal purposes, including but not limited to analyzing user patterns, understanding user needs, and refining our product features. We do not share individual user tag data with any third parties.</p>
+
+								<h2 className="font-bold">Data Security:</h2>
+								<p>We employ industry-standard security measures to safeguard user data, including tag information. However, it's important to note that no method of transmission over the internet or electronic storage is completely secure, and we cannot guarantee absolute security of data.</p>
+
+								<h2 className="font-bold">Changes to Privacy Policy:</h2>
+								<p>We reserve the right to update or modify this privacy policy at any time. Any changes made will be reflected on this page, and users will be notified of significant updates via email or prominent notices on our website.</p>
+
+								<p>By using imagesorter.io, you agree to the terms outlined in this privacy policy. If you have any questions or concerns regarding our privacy practices, you can contact Ray at <a href="raykeating.com">raykeating.com</a>.</p>
+
+								<p>Last Updated: March 10th, 2024</p>
+							</div>
+						
 						</div>
-					</div>
-				</div>
-			)}
-			{windowSize.width && windowSize.width < 768 && (
-				<div className="absolute z-[99999] top-0 right-0 flex items-center justify-center w-screen h-screen">
-					<div className="p-8 bg-white backdrop-blur  rounded flex flex-col gap-3  overflow-y-scroll minimal-scrollbar w-[90%] h-[90%]">
-						{infoContent}
+						
 					</div>
 				</div>
 			)}
