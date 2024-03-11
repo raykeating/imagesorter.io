@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { AppContext } from "@/util/appContext";
 import { useContext } from "react";
 import Photo from "@/types/Photo";
+import Link from "next/link";
 
 export default function DownloadDrawer({
 	selectedPhotos,
@@ -28,17 +29,20 @@ export default function DownloadDrawer({
 	setAppendTagToFilename: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
 	const [showingSettings, setShowingSettings] = useState<boolean>(false);
+	const [downloaded, setDownloaded] = useState<boolean>(false);
 
 	return (
 		<div className="w-full flex justify-between items-center">
 			<div>
 				<div className="relative">
-					<button
-						className="w-10 h-10 border-zinc-500 hover:border-zinc-300 border rounded"
-						onClick={() => setShowingSettings(true)}
-					>
-						<i className="fa-solid fa-gear"></i>
-					</button>
+					<div className="flex gap-2">
+						<button
+							className="h-10 px-3 flex items-center border-zinc-500 hover:border-zinc-300 border rounded"
+							onClick={() => setShowingSettings(true)}
+						>
+							<i className="fa-solid fa-gear text-sm"></i>
+						</button>
+					</div>
 					{showingSettings && (
 						<div className="p-3 rounded border-zinc-500 transition-colors border absolute bg-black bottom-0 left-0 w-[300px]">
 							<div className="flex flex-col gap-1 items-start">
@@ -91,14 +95,15 @@ export default function DownloadDrawer({
 			<div className="flex gap-2">
 				<button
 					className="relative px-3 py-2 rounded border border-zinc-400 hover:border-zinc-300 transition-colors"
-					onClick={() =>
+					onClick={() => {
+						setDownloaded(true);
 						handleDownloadPhotos({
 							isUsingSubfolders,
 							numberByGridOrder,
 							appendTagToFilename,
 							onlyDownloadSelected: false,
-						})
-					}
+						});
+					}}
 				>
 					Download All{" "}
 					<i className="fa-solid fa-download translate-y-[-1px] ml-1"></i>
@@ -106,18 +111,28 @@ export default function DownloadDrawer({
 				{!!selectedPhotos.length && (
 					<button
 						className="relative px-3 py-2 rounded border border-zinc-400 hover:border-zinc-300 transition-colors"
-						onClick={() =>
+						onClick={() => {
+							setDownloaded(true);
 							handleDownloadPhotos({
 								isUsingSubfolders,
 								numberByGridOrder,
 								appendTagToFilename,
 								onlyDownloadSelected: true,
-							})
-						}
+							});
+						}}
 					>
 						Download {selectedPhotos.length} Selected{" "}
 						<i className="fa-solid fa-download"></i>
 					</button>
+				)}
+				{downloaded && (
+					<Link
+						className="relative px-3 py-2 rounded border border-zinc-400 hover:border-zinc-300 transition-colors"
+						href="https://www.buymeacoffee.com/raykeating"
+						target="_blank"
+					>
+						Buy me a coffee <i className="fa-solid fa-mug-hot text-sm"></i>
+					</Link>
 				)}
 			</div>
 		</div>
