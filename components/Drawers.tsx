@@ -7,6 +7,7 @@ import TagsDrawer from "@/components/TagsDrawer";
 import UndoButtons from "@/components/UndoButtons";
 import Photo from "@/types/Photo";
 import Image from "next/image";
+import Link from "next/link";
 
 type DrawerType = "tags" | "settings" | "download"; // settings is not currently used
 
@@ -49,6 +50,11 @@ export default function Drawers({
 			<div className="flex justify-between items-center px-4 h-0 -translate-y-8">
 				<UndoButtons undoPhotos={undoPhotos} redoPhotos={redoPhotos} />
 				<div className="flex gap-1">
+					<Link href="https://forms.fillout.com/t/6rxDbuRsGzus" target="_blank" className="bg-white/60 lg:bg-white/10 text-zinc-100 backdrop-blur h-10 hover:bg-black hover:text-white rounded-lg p-2 px-3 flex items-center justify-center">
+						<span className="text-sm">Upgrade to Pro <i className="fa-solid fa-crown text-sm ml-1" style={{
+							textShadow: "0 0 12px rgba(140, 3, 252,0.9)",
+						}}></i></span>
+					</Link>
 					<DrawerButton
 						setOpenDrawer={setOpenDrawer}
 						type="tags"
