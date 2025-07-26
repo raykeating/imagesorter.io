@@ -1,11 +1,10 @@
 import { Html, Head, Main, NextScript } from "next/document";
-import Script from "next/document";
 
 export default function Document() {
 	return (
 		<Html lang="en">
 			<Head>
-				<Script
+				<NextScript
 					async
 					src="https://kit.fontawesome.com/c1925a55b2.js"
 					crossOrigin="anonymous"
